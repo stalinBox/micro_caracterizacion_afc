@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ec.gob.mag</groupId>
-	<artifactId>micro_template</artifactId>
+	<artifactId>micro_caracterizacion_afc</artifactId>
 	<version>0.0.1</version>
 	<packaging>war</packaging>
 
