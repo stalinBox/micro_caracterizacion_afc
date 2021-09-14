@@ -27,5 +27,6 @@ public class CialcoOfertaProductivaDTO {
 	private Long ciop_reg_usu;
 	private Long ciop_act_usu;
 	private Boolean ciop_eliminado;
+	private String ciop_cat_ids_ruta;
 	private Integer totalRecords;
 }

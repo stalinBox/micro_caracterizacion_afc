@@ -49,11 +49,11 @@ public class CialcoOfertaProductiva {
 	@JsonProperty("ciopCatIdOferta")
 	private Integer ciopCatIdOferta;
 
-//	@ApiModelProperty(value = "Aqui se digita el id de lac ategoria de la oferta productiva", example = "5")
-//	@Column(name = "ciop_cat_id_act_economica", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
-//	@JsonProperty("ciopCatIdOferta")
-//	private Integer ciopCatIdActEconomica;
+	@ApiModelProperty(value = "Aqui se digita el id de lac ategoria de la oferta productiva", example = "5")
+	@Column(name = "ciop_cat_ids_ruta", nullable = false)
+	@NotEmpty(message = "_error.validation_blank.message")
+	@JsonProperty("ciopCatIdsRuta")
+	private String ciopCatIdsRuta;
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/

@@ -82,7 +82,7 @@ public class CialcoOfertaProductivaController implements ErrorController {
 		DataTableRequest<CialcoOfertaProductivaDTO> dataTableInRQ = new DataTableRequest<CialcoOfertaProductivaDTO>(
 				request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY ciop_id ) AS nro, ciop_id, cop.cia_id,  c.cia_nombre, ciop_cat_id_oferta, ciop_estado, ciop_eliminado, ciop_reg_usu, ciop_act_usu,\r\n"
+		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY ciop_id ) AS nro, ciop_id, cop.cia_id,  c.cia_nombre, ciop_cat_ids_ruta, ciop_cat_id_oferta, ciop_estado, ciop_eliminado, ciop_reg_usu, ciop_act_usu,\r\n"
 				+ "(SELECT count (cop.ciop_id) FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id\r\n"
 				+ "WHERE cop.cia_id = " + ciaId + " ) as totalRecords\r\n"
 				+ "FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "

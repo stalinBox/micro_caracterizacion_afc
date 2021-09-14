@@ -102,6 +102,12 @@ public class OfertaDetalle {
 	@JsonProperty("oopdIdCatProducto")
 	private Integer oopdIdCatProducto;
 
+	@ApiModelProperty(value = "Este campo es el id de la categoria del producto", example = "5")
+	@Column(name = "oopdCatIdsRuta")
+	// @NotEmpty(message = "_error.validation_blank.message")
+	@JsonProperty("oopdCatIdsRuta")
+	private String oopdCatIdsRuta;
+
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
