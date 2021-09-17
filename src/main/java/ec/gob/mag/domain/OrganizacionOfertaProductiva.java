@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
+//import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -35,14 +35,14 @@ public class OrganizacionOfertaProductiva {
 	@ApiModelProperty(value = "Valor texto de la Identificación de la organización", example = "nombre categoria")
 	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "org_identificacion", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("orgIdentificacion")
 	private String orgIdentificacion;
 
 	@ApiModelProperty(value = "Valor texto de la razon social de la Organización", example = "nombre categoria")
 	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "org_razon_social", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("orgRazonSocial")
 	private String orgRazonSocial;
 

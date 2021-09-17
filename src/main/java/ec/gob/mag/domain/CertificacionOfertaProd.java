@@ -46,7 +46,7 @@ public class CertificacionOfertaProd {
 
 	@ApiModelProperty(value = "Aqui se digita el id de la categoria de la Certificación", example = "5")
 	@Column(name = "id_cat_certificacion", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("idcatcertificacion")
 	private Integer idCatCertificacion;
 

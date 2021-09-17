@@ -17,7 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import javax.validation.constraints.NotEmpty;
+//import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -52,20 +52,20 @@ public class TipologiaNivel {
 	@ApiModelProperty(value = "Valor texto del nombre de la categoria", example = "nombre categoria")
 	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "tip_cat_nombre", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("tipCatNombre")
 	private String tipCatNombre;
 
 	@ApiModelProperty(value = "Valor texto de la descripcion de la categoria", example = "descripcion categoria")
 	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "tip_cat_descripcion", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("tipCatDescripcion")
 	private String tipCatDescripcion;
 
 	@ApiModelProperty(value = "Aqui se digita el numero del tipo nivel (Consultar)", example = "3")
 	@Column(name = "tip_tipo_nivel", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("tipTipoNivel")
 	private Integer tipTipoNivel;
 

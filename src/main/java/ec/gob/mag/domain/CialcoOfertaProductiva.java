@@ -15,7 +15,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotEmpty;
+//import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,13 +45,13 @@ public class CialcoOfertaProductiva {
 
 	@ApiModelProperty(value = "Aqui se digita el id de lac ategoria de la oferta productiva", example = "5")
 	@Column(name = "ciop_cat_id_oferta", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("ciopCatIdOferta")
 	private Integer ciopCatIdOferta;
 
 	@ApiModelProperty(value = "Aqui se digita el id de lac ategoria de la oferta productiva", example = "5")
 	@Column(name = "ciop_cat_ids_ruta", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("ciopCatIdsRuta")
 	private String ciopCatIdsRuta;
 	/*****************************************************

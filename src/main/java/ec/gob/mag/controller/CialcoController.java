@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +35,7 @@ import ec.gob.mag.controller.CialcoController;
 import ec.gob.mag.domain.Cialco;
 import ec.gob.mag.domain.pagination.DataTableRequest;
 import ec.gob.mag.domain.dto.CialcoDTO;
+import ec.gob.mag.domain.dto.CialcoTest;
 import ec.gob.mag.domain.pagination.AppUtil;
 import ec.gob.mag.domain.pagination.DataTableResults;
 import ec.gob.mag.domain.pagination.PaginationCriteria;
@@ -142,21 +145,12 @@ public class CialcoController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@PostMapping(value = "/update/{usuId}")
+	@PutMapping(value = "/update/{usuId}")
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-//	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@PathVariable Integer usuId, @RequestBody Cialco updateCialco) {
-
-//		Cialco cialco = 
-		cialcoService.findById(updateCialco.getCiaId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id",
-						updateCialco.getCiaId().toString()));
-
-//		cialco.setCiaActUsu(usuId);
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token, @PathVariable Integer usuId,
+			@RequestBody Cialco updateCialco) {
 		updateCialco.setCiaActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-
 		Cialco cialcoUpdate = cialcoService.save(updateCialco);
 		LOGGER.info("cialco Update: " + cialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoUpdate.getCiaId(), "Actualizado"));

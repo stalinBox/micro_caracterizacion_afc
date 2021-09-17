@@ -1,19 +1,23 @@
 package ec.gob.mag.services;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import ec.gob.mag.domain.Cialco;
+import ec.gob.mag.domain.dto.CialcoTest;
 import ec.gob.mag.enums.Constante;
 import ec.gob.mag.exception.MyNotFoundException;
 import ec.gob.mag.repository.CialcoRepository;
+import ec.gob.mag.util.ConvertEntityUtil;
 
 @Service("cialcoService")
 public class CialcoService {
@@ -24,6 +28,10 @@ public class CialcoService {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 //	public void clearObjectLazyVariables(Cialco org) {
 //		org.getCialcoOfertaProductiva().stream().map(u -> {
@@ -96,22 +104,26 @@ public class CialcoService {
 	}
 
 	/**
-	 * Update un registro
+	 * Guarda un registro
 	 * 
 	 * @param entidad: Contiene todos campos de la entidad para guardar
 	 * @return catalogo: La entidad Guardada
 	 */
-//	public Optional<Cialco> Update(Cialco cialco) {
-//		return cialcoRepository.findByCiaIdAndCiaEliminadoAndCiaEstadoEquals(cialco.getCiaId(), false,Constante.REGISTRO_ACTIVO.getCodigo()).map(oldItem ->{
-//		})
-//	}
+	public Cialco update(Cialco cialco) {
+//		Persona productorValidado = convertEntityUtil.ConvertSingleEntityGET(Persona.class, productorB);
+//		Cialco cial = null;
+//		try {
+//			cial = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
+//		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException
+//				| IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		Optional<Cialco> cialcoUpdate = findById(cialco.get().getCiaId());
+		findById(cialco.getCiaId()).orElseThrow(
+				() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", cialco.getCiaId().toString()));
 
-//	   public Optional<Item> update( Long id, Item newItem) {
-//	        // Only update an item if it can be found first.
-//	        return repository.findById(id)
-//	                .map(oldItem -> {
-//	                   Item updated = oldItem.updateWith(newItem);
-//	                   return repository.save(updated);
-//	                });
-//	    }  
+		return cialcoRepository.save(cialco);
+	}
+
 }

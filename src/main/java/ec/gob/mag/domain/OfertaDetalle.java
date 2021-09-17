@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
+//import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,7 +30,7 @@ public class OfertaDetalle {
 
 	@ApiModelProperty(value = "Este campo es el id de la tabla oferta Produciva", example = "5")
 	@Column(name = "oopd_cat_id_oferta")
-	@NotEmpty(message = "_error.validation_Fblank.message")
+//	@NotEmpty(message = "_error.validation_Fblank.message")
 	@JsonProperty("oopdCatIdOferta")
 	private Integer oopdCatIdOferta;
 
@@ -41,9 +41,9 @@ public class OfertaDetalle {
 	private Integer oopdAgrIdVariedad;
 
 	@ApiModelProperty(value = "Condicion", example = "Condición")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "oopd_agr_condicion", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdAgrCondicion")
 	private String oopdAgrCondicion;
 
@@ -54,8 +54,8 @@ public class OfertaDetalle {
 	private Integer oopdSuperficieSembrada;
 
 	@ApiModelProperty(value = "Unidad de medida de la siembra", example = "KG")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "oopd_unidad_medida_siembra", nullable = false)
+	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdUnidadMedidaSiembra")
 	private String oopdUnidadMedidaSiembra;
@@ -67,9 +67,9 @@ public class OfertaDetalle {
 	private Integer oopdMetodoSiembraId;
 
 	@ApiModelProperty(value = "Valor en texto de la producción estimada", example = "1000")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "oopd_produccion_estimada", nullable = false)
-	@NotEmpty(message = "_error.validation_blank.message")
+	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
+//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdProduccionEstimada")
 	private String oopdProduccionEstimada;
 
