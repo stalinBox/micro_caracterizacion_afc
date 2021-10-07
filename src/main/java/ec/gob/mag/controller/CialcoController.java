@@ -32,12 +32,15 @@ import com.google.gson.Gson;
 
 import ec.gob.mag.controller.CialcoController;
 import ec.gob.mag.domain.Cialco;
+import ec.gob.mag.domain.constraint.CialcoAudit;
 import ec.gob.mag.domain.constraint.CialcoCreate;
+import ec.gob.mag.domain.constraint.CialcoUpdate;
 import ec.gob.mag.domain.pagination.DataTableRequest;
 import ec.gob.mag.domain.dto.CialcoDTO;
 import ec.gob.mag.domain.pagination.AppUtil;
 import ec.gob.mag.domain.pagination.DataTableResults;
 import ec.gob.mag.domain.pagination.PaginationCriteria;
+import ec.gob.mag.enums.Constante;
 import ec.gob.mag.services.CialcoService;
 import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
@@ -76,6 +79,147 @@ public class CialcoController implements ErrorController {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param id:    Identificador del registro
+	 * @param usuId: Identificador del usuario que va a eliminar
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
+	@ApiOperation(value = "Gestionar estado del registro disable={11 ACTIVO,12 INACTIVO}, delete={false, true}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody CialcoAudit cialcoAudit) {
+		Cialco auditCialco = cialcoService.findByIdAll(cialcoAudit.getCiaId())
+				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id",
+						cialcoAudit.getCiaId().toString()));
+
+		auditCialco.setCiaEliminado(cialcoAudit.getCiaEliminado());
+		auditCialco.setCiaEstado(cialcoAudit.getCiaEstado());
+		auditCialco.setCiaActUsu(cialcoAudit.getCiaActUsu());
+
+		Cialco cialcoDel = cialcoService.save(auditCialco);
+		LOGGER.info("cialco Delete : " + cialcoAudit.getCiaId() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), cialcoAudit.getState()));
+	}
+
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param id:    Identificador del registro
+	 * @param usuId: Identificador del usuario que va a eliminar
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+//	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
+//	@ApiOperation(value = "Remove cialcos by id")
+//	@ResponseStatus(HttpStatus.OK)
+//	public ResponseEntity<ResponseController> deleteCialco(@RequestHeader(name = "Authorization") String token,
+//			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
+//		Cialco deleteCialco = cialcoService.findById(id, true, Constante.REGISTRO_INACTIVO.getCodigo())
+//				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", id.toString()));
+//		deleteCialco.setCiaEliminado(true);
+//		deleteCialco.setCiaEstado(Constante.REGISTRO_INACTIVO.getCodigo());
+//		deleteCialco.setCiaActUsu(usuId);
+//		Cialco cialcoDel = cialcoService.save(deleteCialco);
+//		LOGGER.info("cialco Delete : " + id + " usuario: " + util.filterUsuId(token));
+//		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), "eliminado"));
+//	}
+
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param id:    Identificador del registro
+	 * @param usuId: Identificador del usuario que va a eliminar
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+//	@RequestMapping(value = "/inhabilitar/{id}/{usuId}", method = RequestMethod.DELETE)
+//	@ApiOperation(value = "Remove cialcos by id")
+//	@ResponseStatus(HttpStatus.OK)
+//	public ResponseEntity<ResponseController> inhabilitarCialco(@RequestHeader(name = "Authorization") String token,
+//			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
+//		Cialco deleteCialco = cialcoService.findById(id, true, Constante.REGISTRO_ACTIVO.getCodigo())
+//				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", id.toString()));
+//		deleteCialco.setCiaEstado(Constante.REGISTRO_INACTIVO.getCodigo());
+//		deleteCialco.setCiaActUsu(usuId);
+//		Cialco cialcoDel = cialcoService.save(deleteCialco);
+//		LOGGER.info("cialco inhabilitar : " + id + " usuario: " + util.filterUsuId(token));
+//		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), "eliminado"));
+//	}
+
+	/**
+	 * Busca todos los registros de la entidad
+	 * 
+	 * @param id: Identificador de la entidad
+	 * @return Entidad: Retorna todos los registros
+	 */
+	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
+	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = Cialco.class)
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<List<Cialco>> findAll(@RequestHeader(name = "Authorization") String token) {
+		List<Cialco> cialco = cialcoService.findAll();
+		LOGGER.info("cialco findAll: " + cialco.toString() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(cialco);
+	}
+
+	/**
+	 * Busca los registros por Id de la entidad
+	 * 
+	 * @param id: Identificador de la entidad
+	 * @return parametrosCarga: Retorna el registro encontrado
+	 */
+	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	@ApiOperation(value = "Get Cialco by id", response = Cialco.class)
+	public ResponseEntity<Optional<Cialco>> findById(@RequestHeader(name = "Authorization") String token,
+			@Validated @PathVariable Long id) {
+		Optional<Cialco> cialco = cialcoService.findById(id, false, Constante.REGISTRO_ACTIVO.getCodigo());
+		LOGGER.info("cialco FindById: " + id + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(cialco);
+	}
+
+	/**
+	 * Actualiza un registro
+	 * 
+	 * @param usuId:   Identificador del usuario que va a actualizar
+	 * 
+	 * @param entidad: entidad a actualizar
+	 * @return ResponseController: Retorna el id actualizado
+	 */
+	@PutMapping(value = "/update/{usuId}")
+	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token, @PathVariable Integer usuId,
+			@RequestBody CialcoUpdate updateCialco) {
+		Cialco cialcoUpdate = cialcoService.update(updateCialco, usuId);
+		cialcoUpdate.setCiaActUsu(usuId);
+		LOGGER.info("cialco Update: " + cialcoUpdate + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoUpdate.getCiaId(), "Actualizado"));
+	}
+
+	/**
+	 * Inserta un nuevo registro en la entidad
+	 * 
+	 * @param entidad: entidad a insertar
+	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	@RequestMapping(value = "/create/", method = RequestMethod.POST)
+	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<?> postCialco(@Validated @RequestBody CialcoCreate cialco,
+			@RequestHeader(name = "Authorization") String token) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+		Cialco productorValidado = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
+		Cialco off = cialcoService.save(productorValidado);
+		LOGGER.info("cialco Cialco create: " + cialco + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(off.getCiaId(), "Creado"));
+	}
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/findAllPaginated/", method = RequestMethod.GET, produces = { "application/json" })
@@ -116,101 +260,6 @@ public class CialcoController implements ErrorController {
 				dataTableResult.setRecordsFiltered(Integer.toString(userList.size()));
 		}
 		return ResponseEntity.ok((new Gson()).toJson(dataTableResult));
-	}
-
-	/**
-	 * Busca todos los registros de la entidad
-	 * 
-	 * @param id: Identificador de la entidad
-	 * @return Entidad: Retorna todos los registros
-	 */
-	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
-	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = Cialco.class)
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<List<Cialco>> findAll(@RequestHeader(name = "Authorization") String token) {
-		List<Cialco> cialco = cialcoService.findAll();
-		LOGGER.info("cialco findAll: " + cialco.toString() + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(cialco);
-	}
-
-	/**
-	 * Busca los registros por Id de la entidad
-	 * 
-	 * @param id: Identificador de la entidad
-	 * @return parametrosCarga: Retorna el registro encontrado
-	 */
-	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	@ApiOperation(value = "Get Cialco by id", response = Cialco.class)
-	public ResponseEntity<Optional<Cialco>> findById(@RequestHeader(name = "Authorization") String token,
-			@Validated @PathVariable Long id) {
-		Optional<Cialco> cialco = cialcoService.findById(id);
-		LOGGER.info("cialco FindById: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(cialco);
-	}
-
-	/**
-	 * Actualiza un registro
-	 * 
-	 * @param usuId:   Identificador del usuario que va a actualizar
-	 * 
-	 * @param entidad: entidad a actualizar
-	 * @return ResponseController: Retorna el id actualizado
-	 */
-	@PutMapping(value = "/update/{usuId}")
-	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token, @PathVariable Integer usuId,
-			@RequestBody Cialco updateCialco) {
-		updateCialco.setCiaActUsu(usuId);
-		Cialco cialcoUpdate = cialcoService.update(updateCialco);
-		LOGGER.info("cialco Update: " + cialcoUpdate + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(cialcoUpdate.getCiaId(), "Actualizado"));
-	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove cialcos by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteCialco(@RequestHeader(name = "Authorization") String token,
-			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
-		Cialco deleteCialco = cialcoService.findById(id)
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", id.toString()));
-		deleteCialco.setCiaEliminado(true);
-		deleteCialco.setCiaActUsu(usuId);
-		Cialco cialcoDel = cialcoService.save(deleteCialco);
-		LOGGER.info("cialco Delete : " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), "eliminado"));
-	}
-
-	/**
-	 * Inserta un nuevo registro en la entidad
-	 * 
-	 * @param entidad: entidad a insertar
-	 * @return ResponseController: Retorna el id creado
-	 * @throws IOException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 */
-	@RequestMapping(value = "/create/", method = RequestMethod.POST)
-	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> postCialco(@Validated @RequestBody CialcoCreate cialco,
-			@RequestHeader(name = "Authorization") String token) throws NoSuchFieldException, SecurityException,
-			IllegalArgumentException, IllegalAccessException, IOException {
-
-		Cialco productorValidado = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
-		Cialco off = cialcoService.save(productorValidado);
-		LOGGER.info("cialco Cialco create: " + cialco + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(off.getCiaId(), "Creado"));
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import ec.gob.mag.domain.Cialco;
+import ec.gob.mag.domain.constraint.CialcoUpdate;
 import ec.gob.mag.enums.Constante;
 import ec.gob.mag.exception.MyNotFoundException;
 import ec.gob.mag.repository.CialcoRepository;
@@ -84,9 +85,25 @@ public class CialcoService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
-	public Optional<Cialco> findById(Long id) {
-		Optional<Cialco> cialco = cialcoRepository.findByCiaIdAndCiaEliminadoAndCiaEstadoEquals(id, false,
-				Constante.REGISTRO_ACTIVO.getCodigo());
+	public Optional<Cialco> findByIdAll(Long id) {
+		Optional<Cialco> cialco = cialcoRepository.findById(id);
+		if (!cialco.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(cialco.get());
+		return cialco;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
+	public Optional<Cialco> findById(Long id, Boolean eliminado, Integer estado) {
+		Optional<Cialco> cialco = cialcoRepository.findByCiaIdAndCiaEliminadoAndCiaEstadoEquals(id, eliminado, estado);
 		if (!cialco.isPresent())
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
@@ -111,8 +128,9 @@ public class CialcoService {
 	 * @param entidad: Contiene todos campos de la entidad para guardar
 	 * @return catalogo: La entidad Guardada
 	 */
-	public Cialco update(Cialco newCialco) {
-		Optional<Cialco> oldCialco = findById(newCialco.getCiaId());
+	public Cialco update(CialcoUpdate newCialco, Integer usupId) {
+		Optional<Cialco> oldCialco = findById(newCialco.getCiaId(), false, Constante.REGISTRO_ACTIVO.getCodigo());
+		oldCialco.get().setCiaActUsu(usupId);
 		copyNonNullProperties(newCialco, oldCialco.get());
 		return cialcoRepository.save(oldCialco.get());
 	}
