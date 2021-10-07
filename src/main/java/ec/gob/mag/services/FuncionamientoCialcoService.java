@@ -66,6 +66,23 @@ public class FuncionamientoCialcoService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<FuncionamientoCialco> findByIdAll(Long id) {
+		Optional<FuncionamientoCialco> fun = funcionamientoCialcoRepository.findById(id);
+		if (!fun.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(fun.get());
+		return fun;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<FuncionamientoCialco> findById(Long id) {
 		Optional<FuncionamientoCialco> funcionamientocialco = funcionamientoCialcoRepository
 				.findByFciaIdAndFciaEliminadoAndFciaEstadoEquals(id, false, Constante.REGISTRO_ACTIVO.getCodigo());

@@ -69,6 +69,23 @@ public class CertificacionOfertaProdService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<CertificacionOfertaProd> findByIdAll(Long id) {
+		Optional<CertificacionOfertaProd> cialco = certificacionOfertaProdRepository.findById(id);
+		if (!cialco.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(cialco.get());
+		return cialco;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<CertificacionOfertaProd> findById(Long id) {
 		Optional<CertificacionOfertaProd> certificacionofertaprod = certificacionOfertaProdRepository
 				.findByCopIdAndCopEliminadoAndCopEstadoEquals(id, false, Constante.REGISTRO_ACTIVO.getCodigo());

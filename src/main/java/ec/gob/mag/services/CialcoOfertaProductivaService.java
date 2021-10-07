@@ -66,6 +66,23 @@ public class CialcoOfertaProductivaService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<CialcoOfertaProductiva> findByIdAll(Long id) {
+		Optional<CialcoOfertaProductiva> cop = cialcoOfertaproductivaRepository.findById(id);
+		if (!cop.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(cop.get());
+		return cop;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<CialcoOfertaProductiva> findById(Long id) {
 		Optional<CialcoOfertaProductiva> cialcoofertaproductiva = cialcoOfertaproductivaRepository
 				.findByCiopIdAndCiopEliminadoAndCiopEstadoEquals(id, false, Constante.REGISTRO_ACTIVO.getCodigo());

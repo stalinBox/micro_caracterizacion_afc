@@ -71,6 +71,23 @@ public class TipologiaNivelService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<TipologiaNivel> findByIdAll(Long id) {
+		Optional<TipologiaNivel> topo = tipologiaNivelRepository.findById(id);
+		if (!topo.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(topo.get());
+		return topo;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<TipologiaNivel> findById(Long id) {
 		Optional<TipologiaNivel> tipologianivel = tipologiaNivelRepository
 				.findByTipIdAndTipEliminadoAndTipEstadoEquals(id, false, 11);

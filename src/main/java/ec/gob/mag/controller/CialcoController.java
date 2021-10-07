@@ -32,7 +32,7 @@ import com.google.gson.Gson;
 
 import ec.gob.mag.controller.CialcoController;
 import ec.gob.mag.domain.Cialco;
-import ec.gob.mag.domain.constraint.CialcoAudit;
+import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.domain.constraint.CialcoCreate;
 import ec.gob.mag.domain.constraint.CialcoUpdate;
 import ec.gob.mag.domain.pagination.DataTableRequest;
@@ -83,25 +83,25 @@ public class CialcoController implements ErrorController {
 	/**
 	 * Realiza un eliminado logico del registro
 	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
+	 * @param RegisterAudit: Identificador del registro contiene
+	 *                       id,actUsu,eliminado,estado,desc
 	 * @return ResponseController: Retorna el id eliminado
 	 */
 	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody CialcoAudit cialcoAudit) {
-		Cialco cialco = cialcoService.findByIdAll(cialcoAudit.getId()).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", cialcoAudit.getId().toString()));
+			@Validated @RequestBody RegisterAudit audit) {
+		Cialco cialco = cialcoService.findByIdAll(audit.getId()).orElseThrow(
+				() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", audit.getId().toString()));
 
-		cialco.setCiaEliminado(cialcoAudit.getEliminado());
-		cialco.setCiaEstado(cialcoAudit.getEstado());
-		cialco.setCiaActUsu(cialcoAudit.getActUsu());
+		cialco.setCiaEliminado(audit.getEliminado());
+		cialco.setCiaEstado(audit.getEstado());
+		cialco.setCiaActUsu(audit.getActUsu());
 
 		Cialco cialcoDel = cialcoService.save(cialco);
-		LOGGER.info("cialco state-record : " + cialcoAudit.getId() + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), cialcoAudit.getState()));
+		LOGGER.info("cialco state-record : " + audit.getId() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), audit.getDesc()));
 	}
 
 	/**

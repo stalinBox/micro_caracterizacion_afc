@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.CertificacionOfertaProd;
+import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.CertificacionOfertaProdService;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
@@ -39,7 +40,6 @@ import io.swagger.annotations.ApiResponses;
 		@ApiResponse(code = 401, message = "UNAUTHORIZED"),
 		@ApiResponse(code = 415, message = "UNSUPPORTED TYPE - Representation not supported for the resource"),
 		@ApiResponse(code = 500, message = "SERVER ERROR") })
-
 public class CertificacionOfertaProdController implements ErrorController {
 
 	private static final String PATH = "/error";
@@ -56,6 +56,31 @@ public class CertificacionOfertaProdController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param RegisterAudit: Identificador del registro contiene
+	 *                       id,actUsu,eliminado,estado,desc
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
+	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody RegisterAudit audit) {
+		CertificacionOfertaProd cop = certificacionOfertaProdService.findByIdAll(audit.getId())
+				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("CertificacionOfertaProd", "Id",
+						audit.getId().toString()));
+
+		cop.setCopEliminado(audit.getEliminado());
+		cop.setCopEstado(audit.getEstado());
+		cop.setCopActUsu((long) audit.getActUsu());
+		CertificacionOfertaProd cialcoDel = certificacionOfertaProdService.save(cop);
+		LOGGER.info("Certificacion Oferta Productiva state-record : " + audit.getId() + " usuario: "
+				+ util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getCopId(), audit.getDesc()));
+	}
 
 	/**
 	 * Busca todos los registros de la entidad
@@ -109,29 +134,6 @@ public class CertificacionOfertaProdController implements ErrorController {
 		LOGGER.info("CertificacionOfertaProd update: " + certificacionofertaprodUpdate + " usuario: "
 				+ util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(certificacionofertaprodUpdate.getCopId(), "Actualizado"));
-	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove certificacionofertaprods by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteCertificacionOfertaProd(
-			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
-			@PathVariable Long usuId) {
-		CertificacionOfertaProd deleteCertificacionOfertaProd = certificacionOfertaProdService.findById(id).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("CertificacionOfertaProd", "Id", id.toString()));
-		deleteCertificacionOfertaProd.setCopEliminado(true);
-		deleteCertificacionOfertaProd.setCopActUsu(usuId);
-		CertificacionOfertaProd certificacionofertaprodDel = certificacionOfertaProdService
-				.save(deleteCertificacionOfertaProd);
-		LOGGER.info("CertificacionOfertaProd Delete id: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(certificacionofertaprodDel.getCopId(), "eliminado"));
 	}
 
 	/**

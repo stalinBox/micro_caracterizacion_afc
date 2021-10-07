@@ -44,6 +44,23 @@ public class MesCosechaService {
 	}
 
 	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
+	public Optional<MesCosecha> findByIdAll(Long id) {
+		Optional<MesCosecha> mesCosecha = mesCosechaRepository.findById(id);
+		if (!mesCosecha.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(mesCosecha.get());
+		return mesCosecha;
+	}
+
+	/**
 	 * Metodo para encontrar todos los registros
 	 * 
 	 * @return Todos los registros de la tabla

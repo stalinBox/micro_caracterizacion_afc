@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.OfertaDetalle;
+import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.OfertaDetalleService;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
@@ -54,6 +55,30 @@ public class OfertaDetalleController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param RegisterAudit: Identificador del registro contiene
+	 *                       id,actUsu,eliminado,estado,desc
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
+	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody RegisterAudit audit) {
+		OfertaDetalle cialco = ofertaDetalleService.findByIdAll(audit.getId()).orElseThrow(
+				() -> new InvalidConfigurationPropertyValueException("OfertaDetalle", "Id", audit.getId().toString()));
+
+		cialco.setOopdEliminado(audit.getEliminado());
+		cialco.setOopdEstado(audit.getEstado());
+		cialco.setOopdActUsu(audit.getActUsu());
+
+		OfertaDetalle cialcoDel = ofertaDetalleService.save(cialco);
+		LOGGER.info("ofertadetalle state-record : " + audit.getId() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getOopdId(), audit.getDesc()));
+	}
 
 	/**
 	 * Busca todos los registros de la entidad

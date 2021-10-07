@@ -69,6 +69,23 @@ public class OfertaDetalleService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<OfertaDetalle> findByIdAll(Long id) {
+		Optional<OfertaDetalle> oferDet = ofertaDetalleRepository.findById(id);
+		if (!oferDet.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(oferDet.get());
+		return oferDet;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<OfertaDetalle> findById(Long id) {
 		Optional<OfertaDetalle> ofertadetalle = ofertaDetalleRepository
 				.findByOopdIdAndOopdEliminadoAndOopdEstadoEquals(id, false, Constante.REGISTRO_ACTIVO.getCodigo());

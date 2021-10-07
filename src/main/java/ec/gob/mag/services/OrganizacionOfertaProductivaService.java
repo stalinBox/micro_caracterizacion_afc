@@ -69,6 +69,23 @@ public class OrganizacionOfertaProductivaService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<OrganizacionOfertaProductiva> findByIdAll(Long id) {
+		Optional<OrganizacionOfertaProductiva> oop = organizacionOfertaProductivaRepository.findById(id);
+		if (!oop.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(oop.get());
+		return oop;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<OrganizacionOfertaProductiva> findById(Long id) {
 		Optional<OrganizacionOfertaProductiva> organizacionofertaproductiva = organizacionOfertaProductivaRepository
 				.findByOopIdAndOopEliminadoAndOopEstadoEquals(id, false, Constante.REGISTRO_ACTIVO.getCodigo());

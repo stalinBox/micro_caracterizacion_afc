@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
 import ec.gob.mag.domain.FuncionamientoCialco;
+import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.domain.dto.FuncionamientoCialcoDTO;
 import ec.gob.mag.domain.pagination.AppUtil;
 import ec.gob.mag.domain.pagination.DataTableRequest;
@@ -72,40 +73,29 @@ public class FuncionamientoCialcoController implements ErrorController {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/findAllPaginated/{ciaId}", method = RequestMethod.GET, produces = { "application/json" })
-	@ResponseBody
-	public ResponseEntity<?> listAplicationPaginated(@PathVariable Long ciaId, HttpServletRequest request,
-			@RequestHeader(name = "Authorization") String token) {
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param RegisterAudit: Identificador del registro contiene
+	 *                       id,actUsu,eliminado,estado,desc
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
+	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody RegisterAudit audit) {
+		FuncionamientoCialco fcialco = funcionamientoCialcoService.findByIdAll(audit.getId())
+				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("FuncionamientoCialco", "Id",
+						audit.getId().toString()));
 
-		DataTableRequest<FuncionamientoCialcoDTO> dataTableInRQ = new DataTableRequest<FuncionamientoCialcoDTO>(
-				request);
-		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY fcia_id ) AS nro, \n" + "CAST(fcia_id AS VARCHAR), \n"
-				+ "CAST(f.cia_id AS VARCHAR), \n" + "CAST(c.cia_nombre AS VARCHAR), \n"
-				+ "CAST(fcia_id_cat_dia_funcionamiento AS VARCHAR), \n" + "CAST(fcia_id_cat_hora_inicio AS VARCHAR), \n"
-				+ "CAST(fcia_id_cat_hora_fin AS VARCHAR), \n" + "CAST(fcia_estado AS VARCHAR), \n"
-				+ "CAST(fcia_eliminado AS VARCHAR), \n" + "CAST(fcia_reg_usu AS VARCHAR), \n"
-				+ "(SELECT count (f.fcia_id) FROM sc_gopagro.funcionamiento_cialco f \n"
-				+ "INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id = " + ciaId
-				+ ") as totalRecords \n"
-				+ "FROM sc_gopagro.funcionamiento_cialco f INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id =  "
-				+ ciaId + ciaId;
-		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
-		Query query = entityManager.createNativeQuery(paginatedQuery, FuncionamientoCialcoDTO.class);
-		List<FuncionamientoCialcoDTO> userList = query.getResultList();
-		DataTableResults<FuncionamientoCialcoDTO> dataTableResult = new DataTableResults<FuncionamientoCialcoDTO>();
-		dataTableResult.setDraw(dataTableInRQ.getDraw());
-		dataTableResult.setListOfDataObjects(userList);
-		if (!AppUtil.isObjectEmpty(userList)) {
-			dataTableResult.setRecordsTotal(((FuncionamientoCialcoDTO) userList.get(0)).getTotalRecords().toString());
-			if (dataTableInRQ.getPaginationRequest().isFilterByEmpty())
-				dataTableResult
-						.setRecordsFiltered(((FuncionamientoCialcoDTO) userList.get(0)).getTotalRecords().toString());
-			else
-				dataTableResult.setRecordsFiltered(Integer.toString(userList.size()));
-		}
-		return ResponseEntity.ok((new Gson()).toJson(dataTableResult));
+		fcialco.setFciaEliminado(audit.getEliminado());
+		fcialco.setFciaEstado(audit.getEstado());
+		fcialco.setFciaActUsu(audit.getActUsu());
+
+		FuncionamientoCialco cialcoDel = funcionamientoCialcoService.save(fcialco);
+		LOGGER.info("Funcionamiento state-record : " + audit.getId() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getFciaId(), audit.getDesc()));
 	}
 
 	/**
@@ -216,6 +206,42 @@ public class FuncionamientoCialcoController implements ErrorController {
 		FuncionamientoCialco off = funcionamientoCialcoService.save(funcionamientocialco);
 		LOGGER.info("funcionamientocialco create: " + funcionamientocialco + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getFciaId(), "Creado"));
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/findAllPaginated/{ciaId}", method = RequestMethod.GET, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<?> listAplicationPaginated(@PathVariable Long ciaId, HttpServletRequest request,
+			@RequestHeader(name = "Authorization") String token) {
+
+		DataTableRequest<FuncionamientoCialcoDTO> dataTableInRQ = new DataTableRequest<FuncionamientoCialcoDTO>(
+				request);
+		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
+		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY fcia_id ) AS nro, \n" + "CAST(fcia_id AS VARCHAR), \n"
+				+ "CAST(f.cia_id AS VARCHAR), \n" + "CAST(c.cia_nombre AS VARCHAR), \n"
+				+ "CAST(fcia_id_cat_dia_funcionamiento AS VARCHAR), \n" + "CAST(fcia_id_cat_hora_inicio AS VARCHAR), \n"
+				+ "CAST(fcia_id_cat_hora_fin AS VARCHAR), \n" + "CAST(fcia_estado AS VARCHAR), \n"
+				+ "CAST(fcia_eliminado AS VARCHAR), \n" + "CAST(fcia_reg_usu AS VARCHAR), \n"
+				+ "(SELECT count (f.fcia_id) FROM sc_gopagro.funcionamiento_cialco f \n"
+				+ "INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id = " + ciaId
+				+ ") as totalRecords \n"
+				+ "FROM sc_gopagro.funcionamiento_cialco f INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id =  "
+				+ ciaId + ciaId;
+		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
+		Query query = entityManager.createNativeQuery(paginatedQuery, FuncionamientoCialcoDTO.class);
+		List<FuncionamientoCialcoDTO> userList = query.getResultList();
+		DataTableResults<FuncionamientoCialcoDTO> dataTableResult = new DataTableResults<FuncionamientoCialcoDTO>();
+		dataTableResult.setDraw(dataTableInRQ.getDraw());
+		dataTableResult.setListOfDataObjects(userList);
+		if (!AppUtil.isObjectEmpty(userList)) {
+			dataTableResult.setRecordsTotal(((FuncionamientoCialcoDTO) userList.get(0)).getTotalRecords().toString());
+			if (dataTableInRQ.getPaginationRequest().isFilterByEmpty())
+				dataTableResult
+						.setRecordsFiltered(((FuncionamientoCialcoDTO) userList.get(0)).getTotalRecords().toString());
+			else
+				dataTableResult.setRecordsFiltered(Integer.toString(userList.size()));
+		}
+		return ResponseEntity.ok((new Gson()).toJson(dataTableResult));
 	}
 
 	@Override

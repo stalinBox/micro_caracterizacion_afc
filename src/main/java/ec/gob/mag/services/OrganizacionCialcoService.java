@@ -66,6 +66,23 @@ public class OrganizacionCialcoService {
 	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
 	 *         entrada
 	 */
+	public Optional<OrganizacionCialco> findByIdAll(Long id) {
+		Optional<OrganizacionCialco> orgc = organizacionCialcoRepository.findById(id);
+		if (!orgc.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					id));
+		clearObjectLazyVariables(orgc.get());
+		return orgc;
+	}
+
+	/**
+	 * Busca un registro por Id
+	 * 
+	 * @param id: Identificador del registro
+	 * @return entidad: Retorna todos los registros filtrados por el parámetros de
+	 *         entrada
+	 */
 	public Optional<OrganizacionCialco> findById(Long id) {
 		Optional<OrganizacionCialco> organizacioncialco = organizacionCialcoRepository
 				.findByOciIdAndOciEliminadoAndOciEstadoEquals(id, false, Constante.REGISTRO_ACTIVO.getCodigo());

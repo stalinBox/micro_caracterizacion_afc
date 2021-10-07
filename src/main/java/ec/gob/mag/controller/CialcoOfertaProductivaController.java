@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
 import ec.gob.mag.domain.CialcoOfertaProductiva;
+import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.domain.dto.CialcoOfertaProductivaDTO;
 import ec.gob.mag.domain.pagination.AppUtil;
 import ec.gob.mag.domain.pagination.DataTableRequest;
@@ -73,39 +74,29 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/findAllPaginated/{ciaId}", method = RequestMethod.GET, produces = { "application/json" })
-	@ResponseBody
-	public ResponseEntity<?> listAplicationPaginated(@PathVariable Long ciaId, HttpServletRequest request,
-			@RequestHeader(name = "Authorization") String token) {
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param RegisterAudit: Identificador del registro contiene
+	 *                       id,actUsu,eliminado,estado,desc
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
+	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody RegisterAudit audit) {
+		CialcoOfertaProductiva ciop = cialcoOfertaProductivaService.findByIdAll(audit.getId())
+				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("CialcoOfertaProductiva", "Id",
+						audit.getId().toString()));
 
-		DataTableRequest<CialcoOfertaProductivaDTO> dataTableInRQ = new DataTableRequest<CialcoOfertaProductivaDTO>(
-				request);
-		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY ciop_id ) AS nro, \n" + "CAST(ciop_id AS VARCHAR), \n"
-				+ "CAST(cop.cia_id AS VARCHAR),  \n" + "CAST(c.cia_nombre AS VARCHAR), \n"
-				+ "CAST(ciop_cat_ids_ruta AS VARCHAR), \n" + "CAST(ciop_cat_id_oferta AS VARCHAR), \n"
-				+ "CAST(ciop_estado AS VARCHAR), \n" + "CAST(ciop_eliminado AS VARCHAR), \n"
-				+ "CAST(ciop_reg_usu AS VARCHAR), \n" + "CAST(ciop_act_usu AS VARCHAR),\n"
-				+ "(SELECT count (cop.ciop_id) FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "
-				+ ciaId + " ) as totalRecords\n"
-				+ "FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "
-				+ ciaId;
-		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
-		Query query = entityManager.createNativeQuery(paginatedQuery, CialcoOfertaProductivaDTO.class);
-		List<CialcoOfertaProductivaDTO> userList = query.getResultList();
-		DataTableResults<CialcoOfertaProductivaDTO> dataTableResult = new DataTableResults<CialcoOfertaProductivaDTO>();
-		dataTableResult.setDraw(dataTableInRQ.getDraw());
-		dataTableResult.setListOfDataObjects(userList);
-		if (!AppUtil.isObjectEmpty(userList)) {
-			dataTableResult.setRecordsTotal(((CialcoOfertaProductivaDTO) userList.get(0)).getTotalRecords().toString());
-			if (dataTableInRQ.getPaginationRequest().isFilterByEmpty())
-				dataTableResult
-						.setRecordsFiltered(((CialcoOfertaProductivaDTO) userList.get(0)).getTotalRecords().toString());
-			else
-				dataTableResult.setRecordsFiltered(Integer.toString(userList.size()));
-		}
-		return ResponseEntity.ok((new Gson()).toJson(dataTableResult));
+		ciop.setCiopEliminado(audit.getEliminado());
+		ciop.setCiopEstado(audit.getEstado());
+		ciop.setCiopActUsu((long) audit.getActUsu());
+
+		CialcoOfertaProductiva cialcoDel = cialcoOfertaProductivaService.save(ciop);
+		LOGGER.info("Cialco OfertaProductiva state-record : " + audit.getId() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiopId(), audit.getDesc()));
 	}
 
 	/**
@@ -164,29 +155,6 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	}
 
 	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove cialcoofertaproductivas by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteCialcoOfertaProductiva(
-			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
-			@PathVariable Long usuId) {
-		CialcoOfertaProductiva deleteCialcoOfertaProductiva = cialcoOfertaProductivaService.findById(id).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("CialcoOfertaProductiva", "Id", id.toString()));
-		deleteCialcoOfertaProductiva.setCiopEliminado(true);
-		deleteCialcoOfertaProductiva.setCiopActUsu(usuId);
-		CialcoOfertaProductiva cialcoofertaproductivaDel = cialcoOfertaProductivaService
-				.save(deleteCialcoOfertaProductiva);
-		LOGGER.info("cialcofertaprod Delete id: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(cialcoofertaproductivaDel.getCiopId(), "eliminado"));
-	}
-
-	/**
 	 * Inserta un nuevo registro en la entidad
 	 * 
 	 * @param entidad: entidad a insertar
@@ -201,6 +169,41 @@ public class CialcoOfertaProductivaController implements ErrorController {
 		CialcoOfertaProductiva off = cialcoOfertaProductivaService.save(cialcoofertaproductiva);
 		LOGGER.info("cialcofertaprod create: " + cialcoofertaproductiva + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getCiopId(), "Creado"));
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/findAllPaginated/{ciaId}", method = RequestMethod.GET, produces = { "application/json" })
+	@ResponseBody
+	public ResponseEntity<?> listAplicationPaginated(@PathVariable Long ciaId, HttpServletRequest request,
+			@RequestHeader(name = "Authorization") String token) {
+
+		DataTableRequest<CialcoOfertaProductivaDTO> dataTableInRQ = new DataTableRequest<CialcoOfertaProductivaDTO>(
+				request);
+		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
+		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY ciop_id ) AS nro, \n" + "CAST(ciop_id AS VARCHAR), \n"
+				+ "CAST(cop.cia_id AS VARCHAR),  \n" + "CAST(c.cia_nombre AS VARCHAR), \n"
+				+ "CAST(ciop_cat_ids_ruta AS VARCHAR), \n" + "CAST(ciop_cat_id_oferta AS VARCHAR), \n"
+				+ "CAST(ciop_estado AS VARCHAR), \n" + "CAST(ciop_eliminado AS VARCHAR), \n"
+				+ "CAST(ciop_reg_usu AS VARCHAR), \n" + "CAST(ciop_act_usu AS VARCHAR),\n"
+				+ "(SELECT count (cop.ciop_id) FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "
+				+ ciaId + " ) as totalRecords\n"
+				+ "FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "
+				+ ciaId;
+		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
+		Query query = entityManager.createNativeQuery(paginatedQuery, CialcoOfertaProductivaDTO.class);
+		List<CialcoOfertaProductivaDTO> userList = query.getResultList();
+		DataTableResults<CialcoOfertaProductivaDTO> dataTableResult = new DataTableResults<CialcoOfertaProductivaDTO>();
+		dataTableResult.setDraw(dataTableInRQ.getDraw());
+		dataTableResult.setListOfDataObjects(userList);
+		if (!AppUtil.isObjectEmpty(userList)) {
+			dataTableResult.setRecordsTotal(((CialcoOfertaProductivaDTO) userList.get(0)).getTotalRecords().toString());
+			if (dataTableInRQ.getPaginationRequest().isFilterByEmpty())
+				dataTableResult
+						.setRecordsFiltered(((CialcoOfertaProductivaDTO) userList.get(0)).getTotalRecords().toString());
+			else
+				dataTableResult.setRecordsFiltered(Integer.toString(userList.size()));
+		}
+		return ResponseEntity.ok((new Gson()).toJson(dataTableResult));
 	}
 
 	@Override

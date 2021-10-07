@@ -27,7 +27,7 @@ import lombok.Setter;
 @Builder
 
 @Entity
-public class CialcoAudit implements Serializable {
+public class RegisterAudit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -39,7 +39,7 @@ public class CialcoAudit implements Serializable {
 	@ApiModelProperty(value = "Estado enviado del registro: disable, delete, activate ", required = true, allowableValues = "disable, delete, activate")
 	@NotBlank(message = "_error.validation_blank.message")
 	@OneOfString(value = { "disable", "delete", "activate" })
-	private String state;
+	private String desc;
 
 	@ApiModelProperty(value = "11=activo  12=inactivo", required = true, allowableValues = "11=>activo, 12=>inactivo", example = "11")
 	@OneOfInteger(value = { 11, 12 }, domainShow = "[11, 12]")

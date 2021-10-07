@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.MesCosecha;
+import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.MesCosechaService;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
@@ -56,6 +57,28 @@ public class MesCosechaController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	/**
+	 * Realiza un eliminado logico del registro
+	 * 
+	 * @param RegisterAudit: Identificador del registro contiene
+	 *                       id,actUsu,eliminado,estado,desc
+	 * @return ResponseController: Retorna el id eliminado
+	 */
+	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
+	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody RegisterAudit audit) {
+		MesCosecha mescosecha = mesCosechaService.findByIdAll(audit.getId()).orElseThrow(
+				() -> new InvalidConfigurationPropertyValueException("MesCosecha", "Id", audit.getId().toString()));
+		mescosecha.setMcoEliminado(audit.getEliminado());
+		mescosecha.setMcoEstado(audit.getEstado());
+		mescosecha.setMcoActUsu((long) audit.getActUsu());
+		MesCosecha cialcoDel = mesCosechaService.save(mescosecha);
+		LOGGER.info("Mes cosecha state-record : " + audit.getId() + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(cialcoDel.getMcoId(), audit.getDesc()));
+	}
 
 	/**
 	 * Busca todos los registros de la entidad
