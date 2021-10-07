@@ -82,9 +82,13 @@ public class CialcoOfertaProductivaController implements ErrorController {
 		DataTableRequest<CialcoOfertaProductivaDTO> dataTableInRQ = new DataTableRequest<CialcoOfertaProductivaDTO>(
 				request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY ciop_id ) AS nro, ciop_id, cop.cia_id,  c.cia_nombre, ciop_cat_ids_ruta, ciop_cat_id_oferta, ciop_estado, ciop_eliminado, ciop_reg_usu, ciop_act_usu,\r\n"
-				+ "(SELECT count (cop.ciop_id) FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id\r\n"
-				+ "WHERE cop.cia_id = " + ciaId + " ) as totalRecords\r\n"
+		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY ciop_id ) AS nro, \n" + "CAST(ciop_id AS VARCHAR), \n"
+				+ "CAST(cop.cia_id AS VARCHAR),  \n" + "CAST(c.cia_nombre AS VARCHAR), \n"
+				+ "CAST(ciop_cat_ids_ruta AS VARCHAR), \n" + "CAST(ciop_cat_id_oferta AS VARCHAR), \n"
+				+ "CAST(ciop_estado AS VARCHAR), \n" + "CAST(ciop_eliminado AS VARCHAR), \n"
+				+ "CAST(ciop_reg_usu AS VARCHAR), \n" + "CAST(ciop_act_usu AS VARCHAR),\n"
+				+ "(SELECT count (cop.ciop_id) FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "
+				+ ciaId + " ) as totalRecords\n"
 				+ "FROM sc_gopagro.cialco_oferta_productiva cop INNER JOIN  sc_gopagro.cialco c ON cop.cia_id = c.cia_id WHERE cop.cia_id = "
 				+ ciaId;
 		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
@@ -112,6 +116,7 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = CialcoOfertaProductiva.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<CialcoOfertaProductiva>> findAll(@RequestHeader(name = "Authorization") String token) {
 		List<CialcoOfertaProductiva> cialcoofertaproductiva = cialcoOfertaProductivaService.findAll();
 		LOGGER.info("cialcofertaprod FindAll: " + cialcoofertaproductiva.toString() + " usuario: "
@@ -127,6 +132,7 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get CialcoOfertaProductiva by id", response = CialcoOfertaProductiva.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<CialcoOfertaProductiva>> findById(
 			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id) {
 		Optional<CialcoOfertaProductiva> cialcoofertaproductiva = cialcoOfertaProductivaService.findById(id);
@@ -143,21 +149,16 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Valid @RequestBody CialcoOfertaProductiva updateCialcoOfertaProductiva, @PathVariable Long usuId) {
-		CialcoOfertaProductiva cialcoofertaproductiva = cialcoOfertaProductivaService
-				.findById(updateCialcoOfertaProductiva.getCiopId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("CialcoOfertaProductiva", "Id",
-						updateCialcoOfertaProductiva.getCiopId().toString()));
-
-		cialcoofertaproductiva.setCiopActUsu(usuId);
+		updateCialcoOfertaProductiva.setCiopActUsu(usuId);
 		// TODOS LOS CAMPOS A ACTUALIZAR
 
 		CialcoOfertaProductiva cialcoofertaproductivaUpdate = cialcoOfertaProductivaService
-				.save(cialcoofertaproductiva);
+				.update(updateCialcoOfertaProductiva);
 		LOGGER.info("cialcofertaprod Update: " + cialcoofertaproductivaUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoofertaproductivaUpdate.getCiopId(), "Actualizado"));
 	}
@@ -169,8 +170,9 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove cialcoofertaproductivas by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteCialcoOfertaProductiva(
 			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
 			@PathVariable Long usuId) {
@@ -192,6 +194,7 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postCialcoOfertaProductiva(
 			@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody CialcoOfertaProductiva cialcoofertaproductiva) {

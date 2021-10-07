@@ -98,21 +98,14 @@ public class CertificacionOfertaProdController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody CertificacionOfertaProd updateCertificacionOfertaProd, @PathVariable Long usuId) {
-		CertificacionOfertaProd certificacionofertaprod = certificacionOfertaProdService
-				.findById(updateCertificacionOfertaProd.getCopId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("CertificacionOfertaProd", "Id",
-						updateCertificacionOfertaProd.getCopId().toString()));
-
-		certificacionofertaprod.setCopActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
+		updateCertificacionOfertaProd.setCopActUsu(usuId);
 		CertificacionOfertaProd certificacionofertaprodUpdate = certificacionOfertaProdService
-				.save(certificacionofertaprod);
+				.update(updateCertificacionOfertaProd);
 		LOGGER.info("CertificacionOfertaProd update: " + certificacionofertaprodUpdate + " usuario: "
 				+ util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(certificacionofertaprodUpdate.getCopId(), "Actualizado"));
@@ -125,7 +118,7 @@ public class CertificacionOfertaProdController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove certificacionofertaprods by id")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteCertificacionOfertaProd(

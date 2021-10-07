@@ -26,7 +26,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -50,7 +52,7 @@ public class Cialco implements Serializable {
 
 	@Id
 	@ApiModelProperty(value = "Este campo es la clave primaria de la tabla", required = true, readOnly = true)
-	@Column(name = "cia_id", unique = true, nullable = false)
+	@Column(name = "cia_id", nullable = true, updatable = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@JsonProperty("ciaId")
 	private Long ciaId;
@@ -116,8 +118,8 @@ public class Cialco implements Serializable {
 	@ApiModelProperty(value = "Aqui se digita el id de la categoria de la funcionalidad", example = "5")
 	@Column(name = "cia_id_cat_frecuencia", nullable = false)
 //	@NotNull(message = "_error.validation_blank.message")
-	@JsonProperty("ciaidcatfuncionalidad")
-	private Integer ciaIdCatFuncionalidad;
+	@JsonProperty("ciaIdCatFrecuencia")
+	private Integer ciaIdCatFrecuencia;
 
 	@ApiModelProperty(value = "Valor texto de la direccion del cialco", example = "etiqueta")
 //	@Size(min = 0, max = 255, message = "_error.validation_range.message-[0, 255]")
@@ -192,8 +194,8 @@ public class Cialco implements Serializable {
 	@ApiModelProperty(value = "Estado Negocio", example = "etiqueta")
 	@Column(name = "cia_estado_negocio", nullable = false)
 //	@NotNull(message = "_error.validation_blank.message")
-	@JsonProperty("ciacEstadoNegocio")
-	private Integer ciacEstadoNegocio;
+	@JsonProperty("ciaEstadoNegocio")
+	private Integer ciaEstadoNegocio;
 
 	@ApiModelProperty(value = "Valor texto de la hora de inicio", example = "etiqueta")
 	@Column(name = "cia_negocio_observacion", nullable = false)
@@ -221,7 +223,6 @@ public class Cialco implements Serializable {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "tip_id")
-	@ApiModelProperty(value = " Clave foranea de la tabla TIPOLOGIA", notes = "***")
 	@JsonProperty("tipologiaNivel")
 	@JsonBackReference
 	private TipologiaNivel tipologiaNivel;
@@ -257,6 +258,7 @@ public class Cialco implements Serializable {
 	@ApiModelProperty(value = "Id de usuario que actualizacio del qi", example = "")
 	@Column(name = "cia_act_usu")
 	@JsonProperty("ciaActUsu")
+	@JsonInclude(Include.NON_NULL)
 	private Integer ciaActUsu;
 
 	@ApiModelProperty(value = "Este campo almacena los valores f =false para eliminado logico  y t= true para indicar que está activo", required = true, allowableValues = "false=>no eliminado lógico, true=> eliminado lógico", example = "")

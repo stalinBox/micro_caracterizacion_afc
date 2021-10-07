@@ -1,19 +1,21 @@
 package ec.gob.mag.services;
 
-import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.source.InvalidConfigurationPropertyValueException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import ec.gob.mag.domain.Cialco;
-import ec.gob.mag.domain.dto.CialcoTest;
 import ec.gob.mag.enums.Constante;
 import ec.gob.mag.exception.MyNotFoundException;
 import ec.gob.mag.repository.CialcoRepository;
@@ -33,27 +35,27 @@ public class CialcoService {
 	@Qualifier("convertEntityUtil")
 	private ConvertEntityUtil convertEntityUtil;
 
-//	public void clearObjectLazyVariables(Cialco org) {
-//		org.getCialcoOfertaProductiva().stream().map(u -> {
-//			u.setCialco(null);
-//			return u;
-//		}).collect(Collectors.toList());
-//
-//		org.getFuncionamientoCialco().stream().map(u -> {
-//			u.setCialco(null);
-//			return u;
-//		}).collect(Collectors.toList());
-//
-//		org.getOrganizacionCialco().stream().map(u -> {
-//			u.setCialco(null);
-//			return u;
-//		}).collect(Collectors.toList());
-//	}
+	public void clearObjectLazyVariables(Cialco org) {
+		org.getCialcoOfertaProductiva().stream().map(u -> {
+			u.setCialco(null);
+			return u;
+		}).collect(Collectors.toList());
+
+		org.getFuncionamientoCialco().stream().map(u -> {
+			u.setCialco(null);
+			return u;
+		}).collect(Collectors.toList());
+
+		org.getOrganizacionCialco().stream().map(u -> {
+			u.setCialco(null);
+			return u;
+		}).collect(Collectors.toList());
+	}
 
 	public List<Cialco> clearListLazyVariables(List<Cialco> orgs) {
 		if (orgs != null)
 			orgs = orgs.stream().map(u -> {
-//				clearObjectLazyVariables(u);
+				clearObjectLazyVariables(u);
 				return u;
 			}).collect(Collectors.toList());
 		return orgs;
@@ -89,7 +91,7 @@ public class CialcoService {
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
 					id));
-//		clearObjectLazyVariables(cialco.get());
+		clearObjectLazyVariables(cialco.get());
 		return cialco;
 	}
 
@@ -104,26 +106,32 @@ public class CialcoService {
 	}
 
 	/**
-	 * Guarda un registro
+	 * Actualiza un registro
 	 * 
 	 * @param entidad: Contiene todos campos de la entidad para guardar
 	 * @return catalogo: La entidad Guardada
 	 */
-	public Cialco update(Cialco cialco) {
-//		Persona productorValidado = convertEntityUtil.ConvertSingleEntityGET(Persona.class, productorB);
-//		Cialco cial = null;
-//		try {
-//			cial = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
-//		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException
-//				| IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		Optional<Cialco> cialcoUpdate = findById(cialco.get().getCiaId());
-		findById(cialco.getCiaId()).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", cialco.getCiaId().toString()));
+	public Cialco update(Cialco newCialco) {
+		Optional<Cialco> oldCialco = findById(newCialco.getCiaId());
+		copyNonNullProperties(newCialco, oldCialco.get());
+		return cialcoRepository.save(oldCialco.get());
+	}
 
-		return cialcoRepository.save(cialco);
+	public static void copyNonNullProperties(Object src, Object target) {
+		BeanUtils.copyProperties(src, target, getNullPropertyNames(src));
+	}
+
+	public static String[] getNullPropertyNames(Object source) {
+		final BeanWrapper src = new BeanWrapperImpl(source);
+		java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+		Set<String> emptyNames = new HashSet<String>();
+		for (java.beans.PropertyDescriptor pd : pds) {
+			Object srcValue = src.getPropertyValue(pd.getName());
+			if (srcValue == null)
+				emptyNames.add(pd.getName());
+		}
+		String[] result = new String[emptyNames.size()];
+		return emptyNames.toArray(result);
 	}
 
 }

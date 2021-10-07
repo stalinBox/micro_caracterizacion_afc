@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -12,11 +13,33 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Component;
 
 @Component("util")
 public class Util {
 
+	// PARA ACTUALIZAR LAS ENTIDADES
+	public static void copyNonNullProperties(Object src, Object target) {
+		BeanUtils.copyProperties(src, target, getNullPropertyNames(src));
+	}
+
+	public static String[] getNullPropertyNames(Object source) {
+		final BeanWrapper src = new BeanWrapperImpl(source);
+		java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+		Set<String> emptyNames = new HashSet<String>();
+		for (java.beans.PropertyDescriptor pd : pds) {
+			Object srcValue = src.getPropertyValue(pd.getName());
+			if (srcValue == null)
+				emptyNames.add(pd.getName());
+		}
+		String[] result = new String[emptyNames.size()];
+		return emptyNames.toArray(result);
+	}
+
+	// PARA DECODIGICAR EL TOKEN
 	public static String decodeJWTHeader(String jwtToken) {
 		String[] splitToken = jwtToken.split("\\.");
 		String encodedHeader = splitToken[0];

@@ -64,6 +64,7 @@ public class OrganizacionCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = OrganizacionCialco.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<OrganizacionCialco>> findAll(@RequestHeader(name = "Authorization") String token) {
 		List<OrganizacionCialco> organizacioncialco = organizacionCialcoService.findAll();
 		LOGGER.info("orgcialco FindAll: " + organizacioncialco.toString() + " usuario: " + util.filterUsuId(token));
@@ -78,6 +79,7 @@ public class OrganizacionCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get OrganizacionCialco by id", response = OrganizacionCialco.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<OrganizacionCialco>> findById(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id) {
 		Optional<OrganizacionCialco> organizacioncialco = organizacionCialcoService.findById(id);
@@ -95,17 +97,11 @@ public class OrganizacionCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody OrganizacionCialco updateOrganizacionCialco, @PathVariable Integer usuId) {
-		OrganizacionCialco organizacioncialco = organizacionCialcoService.findById(updateOrganizacionCialco.getOciId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("OrganizacionCialco", "Id",
-						updateOrganizacionCialco.getOciId().toString()));
-
-		organizacioncialco.setOciActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
-		OrganizacionCialco organizacioncialcoUpdate = organizacionCialcoService.save(organizacioncialco);
+		updateOrganizacionCialco.setOciActUsu(usuId);
+		OrganizacionCialco organizacioncialcoUpdate = organizacionCialcoService.update(updateOrganizacionCialco);
 		LOGGER.info("orgcialco Update: " + organizacioncialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(organizacioncialcoUpdate.getOciId(), "Actualizado"));
 	}
@@ -117,8 +113,9 @@ public class OrganizacionCialcoController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove organizacioncialcos by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteOrganizacionCialco(
 			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
 			@PathVariable Integer usuId) {
@@ -139,6 +136,7 @@ public class OrganizacionCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postOrganizacionCialco(
 			@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody OrganizacionCialco organizacioncialco) {

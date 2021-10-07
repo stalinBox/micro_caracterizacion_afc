@@ -81,12 +81,16 @@ public class FuncionamientoCialcoController implements ErrorController {
 		DataTableRequest<FuncionamientoCialcoDTO> dataTableInRQ = new DataTableRequest<FuncionamientoCialcoDTO>(
 				request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY fcia_id ) AS nro, fcia_id, f.cia_id, c.cia_nombre, fcia_id_cat_dia_funcionamiento, fcia_id_cat_hora_inicio, \r\n"
-				+ "fcia_id_cat_hora_fin, fcia_estado, fcia_eliminado, fcia_reg_usu, (SELECT count (f.fcia_id) FROM sc_gopagro.funcionamiento_cialco f \r\n"
+		String baseQuery = "SELECT ROW_NUMBER() OVER (ORDER BY fcia_id ) AS nro, \n" + "CAST(fcia_id AS VARCHAR), \n"
+				+ "CAST(f.cia_id AS VARCHAR), \n" + "CAST(c.cia_nombre AS VARCHAR), \n"
+				+ "CAST(fcia_id_cat_dia_funcionamiento AS VARCHAR), \n" + "CAST(fcia_id_cat_hora_inicio AS VARCHAR), \n"
+				+ "CAST(fcia_id_cat_hora_fin AS VARCHAR), \n" + "CAST(fcia_estado AS VARCHAR), \n"
+				+ "CAST(fcia_eliminado AS VARCHAR), \n" + "CAST(fcia_reg_usu AS VARCHAR), \n"
+				+ "(SELECT count (f.fcia_id) FROM sc_gopagro.funcionamiento_cialco f \n"
 				+ "INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id = " + ciaId
-				+ ") as totalRecords \r\n"
-				+ "FROM sc_gopagro.funcionamiento_cialco f INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id = "
-				+ ciaId;
+				+ ") as totalRecords \n"
+				+ "FROM sc_gopagro.funcionamiento_cialco f INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id =  "
+				+ ciaId + ciaId;
 		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
 		Query query = entityManager.createNativeQuery(paginatedQuery, FuncionamientoCialcoDTO.class);
 		List<FuncionamientoCialcoDTO> userList = query.getResultList();
@@ -112,6 +116,7 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = FuncionamientoCialco.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<FuncionamientoCialco>> findAll(@RequestHeader(name = "Authorization") String token) {
 		List<FuncionamientoCialco> funcionamientocialco = funcionamientoCialcoService.findAll();
 		LOGGER.info("funcionamientocialco FindAll: " + funcionamientocialco.toString() + " usuario: "
@@ -127,6 +132,7 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get FuncionamientoCialco by id", response = FuncionamientoCialco.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<FuncionamientoCialco>> findById(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id) {
 		Optional<FuncionamientoCialco> funcionamientocialco = funcionamientoCialcoService.findById(id);
@@ -143,6 +149,7 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findByCiaId/{ciaId}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get FuncionamientoCialco by id", response = FuncionamientoCialco.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> findByCiaId(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long ciaId) {
 		List<FuncionamientoCialco> funcionamientocialco = funcionamientoCialcoService.findByCiaId(ciaId);
@@ -159,20 +166,14 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Valid @RequestBody FuncionamientoCialco updateFuncionamientoCialco, @PathVariable Integer usuId) {
-		FuncionamientoCialco funcionamientocialco = funcionamientoCialcoService
-				.findById(updateFuncionamientoCialco.getFciaId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("FuncionamientoCialco", "Id",
-						updateFuncionamientoCialco.getFciaId().toString()));
-
-		funcionamientocialco.setFciaActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
-		FuncionamientoCialco funcionamientocialcoUpdate = funcionamientoCialcoService.save(funcionamientocialco);
+		updateFuncionamientoCialco.setFciaActUsu(usuId);
+		FuncionamientoCialco funcionamientocialcoUpdate = funcionamientoCialcoService
+				.update(updateFuncionamientoCialco);
 		LOGGER.info(
 				"funcionamientocialco Update: " + funcionamientocialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(funcionamientocialcoUpdate.getFciaId(), "Actualizado"));
@@ -185,8 +186,9 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove funcionamientocialcos by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteFuncionamientoCialco(
 			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
 			@PathVariable Integer usuId) {
@@ -207,6 +209,7 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postFuncionamientoCialco(
 			@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody FuncionamientoCialco funcionamientocialco) {

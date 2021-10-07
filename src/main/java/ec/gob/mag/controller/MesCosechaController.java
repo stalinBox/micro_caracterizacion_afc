@@ -65,6 +65,7 @@ public class MesCosechaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = MesCosecha.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<MesCosecha>> findAll(@RequestHeader(name = "Authorization") String token) {
 		List<MesCosecha> mescosecha = mesCosechaService.findAll();
 		LOGGER.info("mescosecha FindAll: " + mescosecha.toString() + " usuario: " + util.filterUsuId(token));
@@ -79,6 +80,7 @@ public class MesCosechaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get MesCosecha by id", response = MesCosecha.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<MesCosecha>> findById(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id) {
 		Optional<MesCosecha> mescosecha = mesCosechaService.findById(id);
@@ -94,19 +96,13 @@ public class MesCosechaController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Valid @RequestBody MesCosecha updateMesCosecha, @PathVariable Long usuId) {
-		MesCosecha mescosecha = mesCosechaService.findById(updateMesCosecha.getMcoId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("MesCosecha", "Id",
-						updateMesCosecha.getMcoId().toString()));
-
-		mescosecha.setMcoActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
-		MesCosecha mescosechaUpdate = mesCosechaService.save(mescosecha);
+		updateMesCosecha.setMcoActUsu(usuId);
+		MesCosecha mescosechaUpdate = mesCosechaService.update(updateMesCosecha);
 		LOGGER.info("mescosecha Update: " + mescosechaUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(mescosechaUpdate.getMcoId(), "Actualizado"));
 	}
@@ -118,8 +114,9 @@ public class MesCosechaController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove mescosechas by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteMesCosecha(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id, @PathVariable Long usuId) {
 		MesCosecha deleteMesCosecha = mesCosechaService.findById(id)
@@ -139,6 +136,7 @@ public class MesCosechaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postMesCosecha(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody MesCosecha mescosecha) {
 		MesCosecha off = mesCosechaService.save(mescosecha);

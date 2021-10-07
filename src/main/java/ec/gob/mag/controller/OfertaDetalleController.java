@@ -63,6 +63,7 @@ public class OfertaDetalleController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = OfertaDetalle.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<OfertaDetalle>> findAll(@RequestHeader(name = "Authorization") String token) {
 		List<OfertaDetalle> ofertadetalle = ofertaDetalleService.findAll();
 		LOGGER.info("ofertadetalle FindAll: " + ofertadetalle.toString() + " usuario: " + util.filterUsuId(token));
@@ -77,6 +78,7 @@ public class OfertaDetalleController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get OfertaDetalle by id", response = OfertaDetalle.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<OfertaDetalle>> findById(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id) {
 		Optional<OfertaDetalle> ofertadetalle = ofertaDetalleService.findById(id);
@@ -92,19 +94,13 @@ public class OfertaDetalleController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody OfertaDetalle updateOfertaDetalle, @PathVariable Integer usuId) {
-		OfertaDetalle ofertadetalle = ofertaDetalleService.findById(updateOfertaDetalle.getOopdId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("OfertaDetalle", "Id",
-						updateOfertaDetalle.getOopdId().toString()));
-
-		ofertadetalle.setOopdActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
-		OfertaDetalle ofertadetalleUpdate = ofertaDetalleService.save(ofertadetalle);
+		updateOfertaDetalle.setOopdActUsu(usuId);
+		OfertaDetalle ofertadetalleUpdate = ofertaDetalleService.update(updateOfertaDetalle);
 		LOGGER.info("ofertadetalle Update: " + ofertadetalleUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(ofertadetalleUpdate.getOopdId(), "Actualizado"));
 	}
@@ -116,8 +112,9 @@ public class OfertaDetalleController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove ofertadetalles by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteOfertaDetalle(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
 		OfertaDetalle deleteOfertaDetalle = ofertaDetalleService.findById(id).orElseThrow(
@@ -137,6 +134,7 @@ public class OfertaDetalleController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postOfertaDetalle(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody OfertaDetalle ofertadetalle) {
 		OfertaDetalle off = ofertaDetalleService.save(ofertadetalle);

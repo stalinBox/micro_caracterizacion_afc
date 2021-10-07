@@ -63,6 +63,7 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = OrganizacionOfertaProductiva.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<OrganizacionOfertaProductiva>> findAll(
 			@RequestHeader(name = "Authorization") String token) {
 		List<OrganizacionOfertaProductiva> organizacionofertaproductiva = organizacionOfertaProductivaService.findAll();
@@ -79,6 +80,7 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get OrganizacionOfertaProductiva by id", response = OrganizacionOfertaProductiva.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<OrganizacionOfertaProductiva>> findById(
 			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id) {
 		Optional<OrganizacionOfertaProductiva> organizacionofertaproductiva = organizacionOfertaProductivaService
@@ -96,22 +98,15 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody OrganizacionOfertaProductiva updateOrganizacionOfertaProductiva,
 			@PathVariable Integer usuId) {
-		OrganizacionOfertaProductiva organizacionofertaproductiva = organizacionOfertaProductivaService
-				.findById(updateOrganizacionOfertaProductiva.getOopId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("OrganizacionOfertaProductiva", "Id",
-						updateOrganizacionOfertaProductiva.getOopId().toString()));
-
-		organizacionofertaproductiva.setOopActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
+		updateOrganizacionOfertaProductiva.setOopActUsu(usuId);
 		OrganizacionOfertaProductiva organizacionofertaproductivaUpdate = organizacionOfertaProductivaService
-				.save(organizacionofertaproductiva);
+				.update(updateOrganizacionOfertaProductiva);
 		LOGGER.info("orgofertaproductiva Update: " + organizacionofertaproductivaUpdate + " usuario: "
 				+ util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(organizacionofertaproductivaUpdate.getOopId(), "Actualizado"));
@@ -124,8 +119,9 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove organizacionofertaproductivas by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteOrganizacionOfertaProductiva(
 			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
 			@PathVariable Integer usuId) {
@@ -149,6 +145,8 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
+
 	public ResponseEntity<ResponseController> postOrganizacionOfertaProductiva(
 			@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody OrganizacionOfertaProductiva organizacionofertaproductiva) {

@@ -64,6 +64,7 @@ public class TipologiaNivelController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findAll", method = RequestMethod.GET)
 	@ApiOperation(value = "Obtiene todos los registros activos no eliminados logicamente", response = TipologiaNivel.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<List<TipologiaNivel>> findAll(@RequestHeader(name = "Authorization") String token) {
 		List<TipologiaNivel> tipologianivel = tipologiaNivelService.findAll();
 		LOGGER.info("tipologiaNivel FindAll: " + tipologianivel.toString() + " usuario: " + util.filterUsuId(token));
@@ -78,6 +79,7 @@ public class TipologiaNivelController implements ErrorController {
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
 	@ApiOperation(value = "Get TipologiaNivel by id", response = TipologiaNivel.class)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<TipologiaNivel>> findById(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id) {
 		Optional<TipologiaNivel> tipologianivel = tipologiaNivelService.findById(id);
@@ -93,19 +95,13 @@ public class TipologiaNivelController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody TipologiaNivel updateTipologiaNivel, @PathVariable Integer usuId) {
-		TipologiaNivel tipologianivel = tipologiaNivelService.findById(updateTipologiaNivel.getTipId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("TipologiaNivel", "Id",
-						updateTipologiaNivel.getTipId().toString()));
-
-		tipologianivel.setTipActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
-		//
-		TipologiaNivel tipologianivelUpdate = tipologiaNivelService.save(tipologianivel);
+		updateTipologiaNivel.setTipActUsu(usuId);
+		TipologiaNivel tipologianivelUpdate = tipologiaNivelService.update(updateTipologiaNivel);
 		LOGGER.info("tipologiaNivel Update: " + tipologianivelUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(tipologianivelUpdate.getTipId(), "Actualizado"));
 	}
@@ -117,8 +113,9 @@ public class TipologiaNivelController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove tipologianivels by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteTipologiaNivel(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
 		TipologiaNivel deleteTipologiaNivel = tipologiaNivelService.findById(id).orElseThrow(
@@ -138,6 +135,7 @@ public class TipologiaNivelController implements ErrorController {
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postTipologiaNivel(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody TipologiaNivel tipologianivel) {
 		TipologiaNivel off = tipologiaNivelService.save(tipologianivel);

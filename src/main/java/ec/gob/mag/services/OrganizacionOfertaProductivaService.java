@@ -1,9 +1,14 @@
 package ec.gob.mag.services;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -82,5 +87,34 @@ public class OrganizacionOfertaProductivaService {
 	 */
 	public OrganizacionOfertaProductiva save(OrganizacionOfertaProductiva organizacionofertaproductiva) {
 		return organizacionOfertaProductivaRepository.save(organizacionofertaproductiva);
+	}
+
+	/**
+	 * Update un registro
+	 * 
+	 * @param entidad: Contiene todos campos de la entidad para guardar
+	 * @return catalogo: La entidad Guardada
+	 */
+	public OrganizacionOfertaProductiva update(OrganizacionOfertaProductiva organizacionofertaproductiva) {
+		Optional<OrganizacionOfertaProductiva> oldEntity = findById(organizacionofertaproductiva.getOopId());
+		copyNonNullProperties(organizacionofertaproductiva, oldEntity.get());
+		return organizacionOfertaProductivaRepository.save(oldEntity.get());
+	}
+
+	public static void copyNonNullProperties(Object src, Object target) {
+		BeanUtils.copyProperties(src, target, getNullPropertyNames(src));
+	}
+
+	public static String[] getNullPropertyNames(Object source) {
+		final BeanWrapper src = new BeanWrapperImpl(source);
+		java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+		Set<String> emptyNames = new HashSet<String>();
+		for (java.beans.PropertyDescriptor pd : pds) {
+			Object srcValue = src.getPropertyValue(pd.getName());
+			if (srcValue == null)
+				emptyNames.add(pd.getName());
+		}
+		String[] result = new String[emptyNames.size()];
+		return emptyNames.toArray(result);
 	}
 }

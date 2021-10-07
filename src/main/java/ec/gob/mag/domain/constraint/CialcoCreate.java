@@ -1,10 +1,8 @@
-package ec.gob.mag.domain.dto;
+package ec.gob.mag.domain.constraint;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,10 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.persistence.Table;
+//import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Email;
@@ -26,7 +23,12 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ec.gob.mag.domain.TipologiaNivel;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -45,12 +47,12 @@ import lombok.Setter;
 
 @Entity
 //@Table(name = "cialco", schema = "sc_gopagro")
-public class CialcoTest implements Serializable {
+public class CialcoCreate implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@ApiModelProperty(value = "Este campo es la clave primaria de la tabla", required = true, readOnly = true)
-	@Column(name = "cia_id", unique = true, nullable = false)
+	@Column(name = "cia_id", nullable = true, updatable = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@JsonProperty("ciaId")
 	private Long ciaId;
@@ -116,8 +118,8 @@ public class CialcoTest implements Serializable {
 	@ApiModelProperty(value = "Aqui se digita el id de la categoria de la funcionalidad", example = "5")
 	@Column(name = "cia_id_cat_frecuencia", nullable = false)
 	@NotNull(message = "_error.validation_blank.message")
-	@JsonProperty("ciaidcatfuncionalidad")
-	private Integer ciaIdCatFuncionalidad;
+	@JsonProperty("ciaIdCatFrecuencia")
+	private Integer ciaIdCatFrecuencia;
 
 	@ApiModelProperty(value = "Valor texto de la direccion del cialco", example = "etiqueta")
 	@Size(min = 0, max = 255, message = "_error.validation_range.message-[0, 255]")
@@ -192,8 +194,8 @@ public class CialcoTest implements Serializable {
 	@ApiModelProperty(value = "Estado Negocio", example = "etiqueta")
 	@Column(name = "cia_estado_negocio", nullable = false)
 	@NotNull(message = "_error.validation_blank.message")
-	@JsonProperty("ciacEstadoNegocio")
-	private Integer ciacEstadoNegocio;
+	@JsonProperty("ciaEstadoNegocio")
+	private Integer ciaEstadoNegocio;
 
 	@ApiModelProperty(value = "Valor texto de la hora de inicio", example = "etiqueta")
 	@Column(name = "cia_negocio_observacion", nullable = false)
@@ -204,27 +206,26 @@ public class CialcoTest implements Serializable {
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
-//	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false)
+//	@OneToMany(cascade = CascadeType.ALL)
 //	@JoinColumn(name = "ciop_id")
 //	@JsonProperty("cialcoOfertaProductiva")
 //	private List<CialcoOfertaProductiva> cialcoOfertaProductiva;
 //
-//	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false)
+//	@OneToMany(cascade = CascadeType.ALL)
 //	@JoinColumn(name = "fcia_id")
 //	@JsonProperty("funcionamientoCialco")
 //	private List<FuncionamientoCialco> funcionamientoCialco;
 //
-//	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = false)
+//	@OneToMany(cascade = CascadeType.ALL)
 //	@JoinColumn(name = "oci_id")
 //	@JsonProperty("organizacionCialco")
 //	private List<OrganizacionCialco> organizacionCialco;
-//
-//	@ManyToOne(fetch = FetchType.EAGER)
-//	@JoinColumn(name = "tip_id")
-//	@ApiModelProperty(value = " Clave foranea de la tabla TIPOLOGIA", notes = "***")
-//	@JsonProperty("tipologiaNivel")
-//	@JsonBackReference
-//	private TipologiaNivel tipologiaNivel;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "tip_id")
+	@JsonProperty("tipologiaNivel")
+	@JsonBackReference
+	private TipologiaNivel tipologiaNivel;
 
 	/*****************************************************
 	 * SECCION - CAMPOS POR DEFECTO EN TODAS LAS ENTIDADES
@@ -257,6 +258,7 @@ public class CialcoTest implements Serializable {
 	@ApiModelProperty(value = "Id de usuario que actualizacio del qi", example = "")
 	@Column(name = "cia_act_usu")
 	@JsonProperty("ciaActUsu")
+	@JsonInclude(Include.NON_NULL)
 	private Integer ciaActUsu;
 
 	@ApiModelProperty(value = "Este campo almacena los valores f =false para eliminado logico  y t= true para indicar que está activo", required = true, allowableValues = "false=>no eliminado lógico, true=> eliminado lógico", example = "")
@@ -264,12 +266,12 @@ public class CialcoTest implements Serializable {
 	@JsonProperty("ciaEliminado")
 	private Boolean ciaEliminado;
 
-//	@PrePersist
-//	void prePersist() {
-//		this.ciaEstado = 11;
-//		this.ciaEliminado = false;
-//		this.ciaRegFecha = new Date();
-//	}
+	@PrePersist
+	void prePersist() {
+		this.ciaEstado = 11;
+		this.ciaEliminado = false;
+		this.ciaRegFecha = new Date();
+	}
 
 	@PreUpdate
 	void preUpdate() {

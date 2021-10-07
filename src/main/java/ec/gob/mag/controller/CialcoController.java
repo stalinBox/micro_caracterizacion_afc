@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,7 +9,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -33,13 +32,14 @@ import com.google.gson.Gson;
 
 import ec.gob.mag.controller.CialcoController;
 import ec.gob.mag.domain.Cialco;
+import ec.gob.mag.domain.constraint.CialcoCreate;
 import ec.gob.mag.domain.pagination.DataTableRequest;
 import ec.gob.mag.domain.dto.CialcoDTO;
-import ec.gob.mag.domain.dto.CialcoTest;
 import ec.gob.mag.domain.pagination.AppUtil;
 import ec.gob.mag.domain.pagination.DataTableResults;
 import ec.gob.mag.domain.pagination.PaginationCriteria;
 import ec.gob.mag.services.CialcoService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -67,6 +67,10 @@ public class CialcoController implements ErrorController {
 	private ResponseController responseController;
 
 	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
+
+	@Autowired
 	@Qualifier("util")
 	private Util util;
 
@@ -78,18 +82,25 @@ public class CialcoController implements ErrorController {
 	@ResponseBody
 	public ResponseEntity<?> listAplicationPaginated(HttpServletRequest request,
 			@RequestHeader(name = "Authorization") String token) {
-
 		DataTableRequest<CialcoDTO> dataTableInRQ = new DataTableRequest<CialcoDTO>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT  ROW_NUMBER() OVER (ORDER BY c.cia_id ) AS nro, c.cia_id, cop.ciop_cat_id_oferta,  ubi_id_provincia, ubi_id_canton, ubi_id_parroquia,  \r\n"
-				+ "org_id,   soc_id,   tip_id,   per_identificacion,   per_nombres, \r\n"
-				+ "cia_nombre,   cia_descripcion,   cia_sect_referencia, \r\n"
-				+ "cia_id_cat_frecuencia,   cia_direccion,   cia_telefono,   cia_celular, \r\n"
-				+ "cia_correo,   cia_cord_x,   cia_cord_y,   cia_cord_z, \r\n"
-				+ "cia_cord_hemisferio,   cia_cord_zona,   cia_cord_latitud, \r\n"
-				+ "cia_cord_longitud,   cia_estado_negocio,   cia_negocio_observacion, \r\n"
-				+ "c.cia_estado,   c.cia_eliminado, (SELECT count(c.cia_id) \r\n"
-				+ "FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ) AS totalRecords\r\n"
+		String baseQuery = "SELECT  ROW_NUMBER() OVER (ORDER BY c.cia_id ) AS nro, \n"
+				+ "CAST (c.cia_id AS VARCHAR) , \n" + "CAST (cop.ciop_cat_id_oferta AS VARCHAR) ,  \n"
+				+ "CAST (ubi_id_provincia AS VARCHAR) , \n" + "CAST (ubi_id_canton AS VARCHAR) , \n"
+				+ "CAST (ubi_id_parroquia AS VARCHAR) ,  \n" + "CAST (org_id AS VARCHAR) ,\n"
+				+ "CAST (soc_id AS VARCHAR) ,\n" + "CAST (tip_id AS VARCHAR) ,\n"
+				+ "CAST (per_identificacion AS VARCHAR) ,\n" + "CAST (per_nombres AS VARCHAR) , \n"
+				+ "CAST (cia_nombre AS VARCHAR) ,\n" + "CAST (cia_descripcion AS VARCHAR) ,\n"
+				+ "CAST (cia_sect_referencia AS VARCHAR) , \n" + "CAST (cia_id_cat_frecuencia AS VARCHAR) ,\n"
+				+ "CAST (cia_direccion AS VARCHAR) ,\n" + "CAST (cia_telefono AS VARCHAR) ,\n"
+				+ "CAST (cia_celular AS VARCHAR) , \n" + "CAST (cia_correo AS VARCHAR) ,\n"
+				+ "CAST (cia_cord_x AS VARCHAR) ,\n" + "CAST (cia_cord_y AS VARCHAR) ,\n"
+				+ "CAST (cia_cord_z AS VARCHAR) , \n" + "CAST (cia_cord_hemisferio AS VARCHAR) ,\n"
+				+ "CAST (cia_cord_zona AS VARCHAR) ,\n" + "CAST (cia_cord_latitud AS VARCHAR) , \n"
+				+ "CAST (cia_cord_longitud AS VARCHAR) ,\n" + "CAST (cia_estado_negocio AS VARCHAR) , \n"
+				+ "CAST (cia_negocio_observacion AS VARCHAR) , \n" + "CAST (c.cia_estado AS VARCHAR) ,\n"
+				+ "CAST (c.cia_eliminado AS VARCHAR) ,\n"
+				+ "(SELECT count(c.cia_id)  FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ) AS totalRecords\n"
 				+ "FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ORDER BY c.cia_id";
 		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
 		Query query = entityManager.createNativeQuery(paginatedQuery, CialcoDTO.class);
@@ -129,6 +140,7 @@ public class CialcoController implements ErrorController {
 	 * @return parametrosCarga: Retorna el registro encontrado
 	 */
 	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(value = "Get Cialco by id", response = Cialco.class)
 	public ResponseEntity<Optional<Cialco>> findById(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id) {
@@ -147,11 +159,11 @@ public class CialcoController implements ErrorController {
 	 */
 	@PutMapping(value = "/update/{usuId}")
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token, @PathVariable Integer usuId,
 			@RequestBody Cialco updateCialco) {
 		updateCialco.setCiaActUsu(usuId);
-		Cialco cialcoUpdate = cialcoService.save(updateCialco);
+		Cialco cialcoUpdate = cialcoService.update(updateCialco);
 		LOGGER.info("cialco Update: " + cialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoUpdate.getCiaId(), "Actualizado"));
 	}
@@ -163,8 +175,9 @@ public class CialcoController implements ErrorController {
 	 * @param usuId: Identificador del usuario que va a eliminar
 	 * @return ResponseController: Retorna el id eliminado
 	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
 	@ApiOperation(value = "Remove cialcos by id")
+	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> deleteCialco(@RequestHeader(name = "Authorization") String token,
 			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
 		Cialco deleteCialco = cialcoService.findById(id)
@@ -181,13 +194,21 @@ public class CialcoController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> postCialco(@Validated @RequestBody Cialco cialco,
-			@RequestHeader(name = "Authorization") String token) {
-		Cialco off = cialcoService.save(cialco);
+	public ResponseEntity<?> postCialco(@Validated @RequestBody CialcoCreate cialco,
+			@RequestHeader(name = "Authorization") String token) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+
+		Cialco productorValidado = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
+		Cialco off = cialcoService.save(productorValidado);
 		LOGGER.info("cialco Cialco create: " + cialco + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getCiaId(), "Creado"));
 	}
