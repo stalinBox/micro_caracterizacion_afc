@@ -88,65 +88,21 @@ public class CialcoController implements ErrorController {
 	 * @return ResponseController: Retorna el id eliminado
 	 */
 	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
-	@ApiOperation(value = "Gestionar estado del registro disable={11 ACTIVO,12 INACTIVO}, delete={false, true}")
+	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody CialcoAudit cialcoAudit) {
-		Cialco auditCialco = cialcoService.findByIdAll(cialcoAudit.getCiaId())
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id",
-						cialcoAudit.getCiaId().toString()));
+		Cialco cialco = cialcoService.findByIdAll(cialcoAudit.getId()).orElseThrow(
+				() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", cialcoAudit.getId().toString()));
 
-		auditCialco.setCiaEliminado(cialcoAudit.getCiaEliminado());
-		auditCialco.setCiaEstado(cialcoAudit.getCiaEstado());
-		auditCialco.setCiaActUsu(cialcoAudit.getCiaActUsu());
+		cialco.setCiaEliminado(cialcoAudit.getEliminado());
+		cialco.setCiaEstado(cialcoAudit.getEstado());
+		cialco.setCiaActUsu(cialcoAudit.getActUsu());
 
-		Cialco cialcoDel = cialcoService.save(auditCialco);
-		LOGGER.info("cialco Delete : " + cialcoAudit.getCiaId() + " usuario: " + util.filterUsuId(token));
+		Cialco cialcoDel = cialcoService.save(cialco);
+		LOGGER.info("cialco state-record : " + cialcoAudit.getId() + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), cialcoAudit.getState()));
 	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-//	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-//	@ApiOperation(value = "Remove cialcos by id")
-//	@ResponseStatus(HttpStatus.OK)
-//	public ResponseEntity<ResponseController> deleteCialco(@RequestHeader(name = "Authorization") String token,
-//			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
-//		Cialco deleteCialco = cialcoService.findById(id, true, Constante.REGISTRO_INACTIVO.getCodigo())
-//				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", id.toString()));
-//		deleteCialco.setCiaEliminado(true);
-//		deleteCialco.setCiaEstado(Constante.REGISTRO_INACTIVO.getCodigo());
-//		deleteCialco.setCiaActUsu(usuId);
-//		Cialco cialcoDel = cialcoService.save(deleteCialco);
-//		LOGGER.info("cialco Delete : " + id + " usuario: " + util.filterUsuId(token));
-//		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), "eliminado"));
-//	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-//	@RequestMapping(value = "/inhabilitar/{id}/{usuId}", method = RequestMethod.DELETE)
-//	@ApiOperation(value = "Remove cialcos by id")
-//	@ResponseStatus(HttpStatus.OK)
-//	public ResponseEntity<ResponseController> inhabilitarCialco(@RequestHeader(name = "Authorization") String token,
-//			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
-//		Cialco deleteCialco = cialcoService.findById(id, true, Constante.REGISTRO_ACTIVO.getCodigo())
-//				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("Cialco", "Id", id.toString()));
-//		deleteCialco.setCiaEstado(Constante.REGISTRO_INACTIVO.getCodigo());
-//		deleteCialco.setCiaActUsu(usuId);
-//		Cialco cialcoDel = cialcoService.save(deleteCialco);
-//		LOGGER.info("cialco inhabilitar : " + id + " usuario: " + util.filterUsuId(token));
-//		return ResponseEntity.ok(new ResponseController(cialcoDel.getCiaId(), "eliminado"));
-//	}
 
 	/**
 	 * Busca todos los registros de la entidad
