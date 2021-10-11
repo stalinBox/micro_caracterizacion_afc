@@ -36,22 +36,22 @@ public class RegisterAudit implements Serializable {
 	@NotNull(message = "_error.validation_blank.message")
 	private Long id;
 
-	@ApiModelProperty(value = "Estado enviado del registro: disable, delete, activate ", required = true, allowableValues = "disable, delete, activate")
-	@NotBlank(message = "_error.validation_blank.message")
-	@OneOfString(value = { "disable", "delete", "activate" })
-	private String desc;
-
 	@ApiModelProperty(value = "11=activo  12=inactivo", required = true, allowableValues = "11=>activo, 12=>inactivo", example = "11")
 	@OneOfInteger(value = { 11, 12 }, domainShow = "[11, 12]")
 	@NotNull(message = "_error.validation_blank.message")
 	private Integer estado;
 
-	@ApiModelProperty(value = "Id de usuario que actualizacio del registro", example = "")
+	@ApiModelProperty(value = "Id de usuario que actualizacio del registro")
 	@NotNull(message = "_error.validation_blank.message")
 	private Integer actUsu;
 
-	@ApiModelProperty(value = "Este campo almacena los valores f =false para eliminado logico  y t= true para indicar que está activo", required = true, allowableValues = "false=>no eliminado lógico, true=> eliminado lógico", example = "")
+	@ApiModelProperty(value = "Este campo almacena los valores f =false para eliminado logico  y t= true para indicar que está activo", required = true, allowableValues = "false=>no eliminado lógico, true=> eliminado lógico")
 	@NotNull(message = "_error.validation_blank.message")
 	private Boolean eliminado;
+
+	@ApiModelProperty(value = "Estado enviado del registro: disable, delete, activate ", required = true, allowableValues = "disable, delete, activate", example = "delete")
+	@NotBlank(message = "_error.validation_blank.message")
+	@OneOfString(value = { "disable", "delete", "activate" })
+	private String desc;
 
 }

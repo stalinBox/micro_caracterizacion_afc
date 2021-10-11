@@ -81,14 +81,14 @@ public class CialcoController implements ErrorController {
 	private EntityManager entityManager;
 
 	/**
-	 * Realiza un eliminado logico del registro
+	 * Realiza un mantenimiento del estado del registro
 	 * 
 	 * @param RegisterAudit: Identificador del registro contiene
 	 *                       id,actUsu,eliminado,estado,desc
 	 * @return ResponseController: Retorna el id eliminado
 	 */
 	@RequestMapping(value = "/state-record/", method = RequestMethod.PUT)
-	@ApiOperation(value = "Gestionar estado del registro ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
+	@ApiOperation(value = "Gestionar estado del registro de la tabla CIALCO, ciaEstado={11 ACTIVO,12 INACTIVO}, ciaEliminado={false, true}, state: {disable, delete, activate}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> stateCialco(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody RegisterAudit audit) {
@@ -177,8 +177,15 @@ public class CialcoController implements ErrorController {
 		return ResponseEntity.ok(new ResponseController(off.getCiaId(), "Creado"));
 	}
 
+	/**
+	 * Servicio paginado para la tabla CIALCO. Este servicio usa el paginado de
+	 * criteria optimizando el performance de las consultas y busquedas se
+	 * recomienda usar este tipo de paginado para todos los servicios
+	 * 
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/findAllPaginated/", method = RequestMethod.GET, produces = { "application/json" })
+	@ApiOperation(value = "Paginacion con criteria para encontrar todos los registros de afc")
 	@ResponseBody
 	public ResponseEntity<?> listAplicationPaginated(HttpServletRequest request,
 			@RequestHeader(name = "Authorization") String token) {
