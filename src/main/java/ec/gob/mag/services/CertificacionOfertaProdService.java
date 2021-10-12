@@ -75,7 +75,7 @@ public class CertificacionOfertaProdService {
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
 					id));
-		clearObjectLazyVariables(cialco.get());
+//		clearObjectLazyVariables(cialco.get());
 		return cialco;
 	}
 
@@ -93,7 +93,7 @@ public class CertificacionOfertaProdService {
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
 					id));
-		clearObjectLazyVariables(certificacionofertaprod.get());
+//		clearObjectLazyVariables(certificacionofertaprod.get());
 		return certificacionofertaprod;
 	}
 

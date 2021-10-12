@@ -56,7 +56,7 @@ public class MesCosechaService {
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
 					id));
-		clearObjectLazyVariables(mesCosecha.get());
+//		clearObjectLazyVariables(mesCosecha.get());
 		return mesCosecha;
 	}
 

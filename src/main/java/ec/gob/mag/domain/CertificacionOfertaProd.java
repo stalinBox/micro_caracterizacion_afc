@@ -17,8 +17,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -45,7 +44,6 @@ public class CertificacionOfertaProd {
 
 	@ApiModelProperty(value = "Aqui se digita el id de la categoria de la Certificación", example = "5")
 	@Column(name = "id_cat_certificacion", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("idcatcertificacion")
 	private Integer idCatCertificacion;
 
@@ -54,8 +52,7 @@ public class CertificacionOfertaProd {
 	 *****************************************************/
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "oopd_id")
-	@ApiModelProperty(value = " Clave foranea de la tabla Oferta Detalle", notes = "***")
-	@JsonManagedReference
+	@JsonBackReference
 	private OfertaDetalle ofertaDetalle;
 
 	/*****************************************************

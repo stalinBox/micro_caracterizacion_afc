@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -72,6 +73,14 @@ public class MesCosecha {
 	@Column(name = "mco_diciembre")
 	@JsonProperty("mcoDiciembre")
 	private Boolean mcoDiciembre;
+
+	/*****************************************************
+	 * SECCION - RELACIONES JPA
+	 *****************************************************/
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "oopd_id")
+	@JsonBackReference
+	private OfertaDetalle ofertaDetalle;
 
 	/*****************************************************
 	 * SECCION - CAMPOS POR DEFECTO EN TODAS LAS ENTIDADES

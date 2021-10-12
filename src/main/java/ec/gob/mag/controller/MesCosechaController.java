@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +24,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.MesCosecha;
+import ec.gob.mag.domain.constraint.MesCosechaCreate;
+import ec.gob.mag.domain.constraint.MesCosechaUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.MesCosechaService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -57,6 +61,10 @@ public class MesCosechaController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	/**
 	 * Realiza un eliminado logico del registro
@@ -118,37 +126,26 @@ public class MesCosechaController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Valid @RequestBody MesCosecha updateMesCosecha, @PathVariable Long usuId) {
-		updateMesCosecha.setMcoActUsu(usuId);
-		MesCosecha mescosechaUpdate = mesCosechaService.update(updateMesCosecha);
+			@Valid @RequestBody MesCosechaUpdate updateMesCosecha) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+
+		MesCosecha mescosechaValidado = convertEntityUtil.ConvertSingleEntityGET(MesCosecha.class,
+				(Object) updateMesCosecha);
+
+		mescosechaValidado.setOfertaDetalle(updateMesCosecha.getOfertaDetalle());
+		MesCosecha mescosechaUpdate = mesCosechaService.update(mescosechaValidado);
 		LOGGER.info("mescosecha Update: " + mescosechaUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(mescosechaUpdate.getMcoId(), "Actualizado"));
-	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove mescosechas by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteMesCosecha(@RequestHeader(name = "Authorization") String token,
-			@Validated @PathVariable Long id, @PathVariable Long usuId) {
-		MesCosecha deleteMesCosecha = mesCosechaService.findById(id)
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("MesCosecha", "Id", id.toString()));
-		deleteMesCosecha.setMcoEliminado(true);
-		deleteMesCosecha.setMcoActUsu(usuId);
-		MesCosecha mescosechaDel = mesCosechaService.save(deleteMesCosecha);
-		LOGGER.info("mescosecha Delete: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(mescosechaDel.getMcoId(), "eliminado"));
 	}
 
 	/**
@@ -156,13 +153,22 @@ public class MesCosechaController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postMesCosecha(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody MesCosecha mescosecha) {
-		MesCosecha off = mesCosechaService.save(mescosecha);
+			@Validated @RequestBody MesCosechaCreate mescosecha) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+
+		MesCosecha mescosechaValidado = convertEntityUtil.ConvertSingleEntityGET(MesCosecha.class, (Object) mescosecha);
+		mescosechaValidado.setOfertaDetalle(mescosecha.getOfertaDetalle());
+		MesCosecha off = mesCosechaService.save(mescosechaValidado);
 		LOGGER.info("MesCosecha Create: " + mescosecha + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getMcoId(), "Creado"));
 	}

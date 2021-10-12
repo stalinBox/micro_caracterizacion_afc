@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +22,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.OrganizacionOfertaProductiva;
+import ec.gob.mag.domain.constraint.OrganizacionOfertaProductivaCreate;
+import ec.gob.mag.domain.constraint.OrganizacionOfertaProductivaUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.OrganizacionOfertaProductivaService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -55,6 +59,10 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	/**
 	 * Realiza un eliminado logico del registro
@@ -123,44 +131,26 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody OrganizacionOfertaProductiva updateOrganizacionOfertaProductiva,
-			@PathVariable Integer usuId) {
-		updateOrganizacionOfertaProductiva.setOopActUsu(usuId);
-		OrganizacionOfertaProductiva organizacionofertaproductivaUpdate = organizacionOfertaProductivaService
-				.update(updateOrganizacionOfertaProductiva);
-		LOGGER.info("orgofertaproductiva Update: " + organizacionofertaproductivaUpdate + " usuario: "
-				+ util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(organizacionofertaproductivaUpdate.getOopId(), "Actualizado"));
-	}
+			@Validated @RequestBody OrganizacionOfertaProductivaUpdate updateOrganizacionOfertaProductiva)
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			IOException {
 
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove organizacionofertaproductivas by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteOrganizacionOfertaProductiva(
-			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
-			@PathVariable Integer usuId) {
-		OrganizacionOfertaProductiva deleteOrganizacionOfertaProductiva = organizacionOfertaProductivaService
-				.findById(id)
-				.orElseThrow(() -> new InvalidConfigurationPropertyValueException("OrganizacionOfertaProductiva", "Id",
-						id.toString()));
-		deleteOrganizacionOfertaProductiva.setOopEliminado(true);
-		deleteOrganizacionOfertaProductiva.setOopActUsu(usuId);
-		OrganizacionOfertaProductiva organizacionofertaproductivaDel = organizacionOfertaProductivaService
-				.save(deleteOrganizacionOfertaProductiva);
-		LOGGER.info("orgofertaproductiva Delete: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(organizacionofertaproductivaDel.getOopId(), "eliminado"));
+		OrganizacionOfertaProductiva oopValidado = convertEntityUtil.ConvertSingleEntityGET(
+				OrganizacionOfertaProductiva.class, (Object) updateOrganizacionOfertaProductiva);
+		OrganizacionOfertaProductiva off = organizacionOfertaProductivaService.update(oopValidado);
+
+		LOGGER.info("orgofertaproductiva Update: " + off + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(off.getOopId(), "Actualizado"));
 	}
 
 	/**
@@ -168,17 +158,24 @@ public class OrganizacionOfertaProductivaController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
-
 	public ResponseEntity<ResponseController> postOrganizacionOfertaProductiva(
 			@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody OrganizacionOfertaProductiva organizacionofertaproductiva) {
-		OrganizacionOfertaProductiva off = organizacionOfertaProductivaService.save(organizacionofertaproductiva);
-		LOGGER.info(
-				"orgofertaproductiva CREATE: " + organizacionofertaproductiva + " usuario: " + util.filterUsuId(token));
+			@Validated @RequestBody OrganizacionOfertaProductivaCreate organizacionofertaproductiva)
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			IOException {
+		OrganizacionOfertaProductiva oopValidado = convertEntityUtil
+				.ConvertSingleEntityGET(OrganizacionOfertaProductiva.class, (Object) organizacionofertaproductiva);
+		OrganizacionOfertaProductiva off = organizacionOfertaProductivaService.save(oopValidado);
+		LOGGER.info("orgofertaproductiva CREATE: " + off + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getOopId(), "Creado"));
 	}
 

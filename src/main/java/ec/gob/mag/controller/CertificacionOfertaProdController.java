@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,8 +23,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.CertificacionOfertaProd;
+import ec.gob.mag.domain.constraint.CertificacionOfertaProdCreate;
+import ec.gob.mag.domain.constraint.CertificacionOfertaProdUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.CertificacionOfertaProdService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -56,6 +60,10 @@ public class CertificacionOfertaProdController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	/**
 	 * Realiza un eliminado logico del registro
@@ -122,18 +130,27 @@ public class CertificacionOfertaProdController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody CertificacionOfertaProd updateCertificacionOfertaProd, @PathVariable Long usuId) {
-		updateCertificacionOfertaProd.setCopActUsu(usuId);
-		CertificacionOfertaProd certificacionofertaprodUpdate = certificacionOfertaProdService
-				.update(updateCertificacionOfertaProd);
-		LOGGER.info("CertificacionOfertaProd update: " + certificacionofertaprodUpdate + " usuario: "
-				+ util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(certificacionofertaprodUpdate.getCopId(), "Actualizado"));
+			@Validated @RequestBody CertificacionOfertaProdUpdate updateCertificacionOfertaProd)
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			IOException {
+
+		CertificacionOfertaProd certOfertValidado = convertEntityUtil
+				.ConvertSingleEntityGET(CertificacionOfertaProd.class, (Object) updateCertificacionOfertaProd);
+		certOfertValidado.setOfertaDetalle(updateCertificacionOfertaProd.getOfertaDetalle());
+
+		CertificacionOfertaProd off = certificacionOfertaProdService.update(certOfertValidado);
+		LOGGER.info("CertificacionOfertaProd update: " + off + " usuario: " + util.filterUsuId(token));
+		return ResponseEntity.ok(new ResponseController(off.getCopId(), "Actualizado"));
 	}
 
 	/**
@@ -141,16 +158,26 @@ public class CertificacionOfertaProdController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postCertificacionOfertaProd(
 			@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody CertificacionOfertaProd certificacionofertaprod) {
-		CertificacionOfertaProd off = certificacionOfertaProdService.save(certificacionofertaprod);
-		LOGGER.info(
-				"CertificacionOfertaProd create: " + certificacionofertaprod + " usuario: " + util.filterUsuId(token));
+			@Validated @RequestBody CertificacionOfertaProdCreate certificacionofertaprod) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+
+		CertificacionOfertaProd certOfertValidado = convertEntityUtil
+				.ConvertSingleEntityGET(CertificacionOfertaProd.class, (Object) certificacionofertaprod);
+
+		certOfertValidado.setOfertaDetalle(certificacionofertaprod.getOfertaDetalle());
+		CertificacionOfertaProd off = certificacionOfertaProdService.save(certOfertValidado);
+		LOGGER.info("CertificacionOfertaProd create: " + off + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getCopId(), "Creado"));
 	}
 

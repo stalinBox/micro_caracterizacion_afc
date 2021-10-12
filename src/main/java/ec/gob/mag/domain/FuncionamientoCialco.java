@@ -45,28 +45,24 @@ public class FuncionamientoCialco {
 
 	@ApiModelProperty(value = "ID de la categoria del dia de funcionamiento", example = "4")
 	@Column(name = "fcia_id_cat_dia_funcionamiento", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("fciaIdCatdiaFuncionamiento")
 	private Integer fciaIdCatdiaFuncionamiento;
 
 	@ApiModelProperty(value = "Hora de Inicio de Actividades", example = "8")
 	@Column(name = "fcia_id_cat_hora_inicio", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("fciaIdCatHoraInicio")
 	private Integer fciaIdCatHoraInicio;
 
 	@ApiModelProperty(value = "Hora de Fin de Actividades", example = "17")
 	@Column(name = "fcia_id_cat_hora_fin", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("fciaIdCatHoraFin")
 	private Integer fciaIdCatHoraFin;
 
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "cia_id")
-	@ApiModelProperty(value = " Clave foranea de la tabla CIALCO", notes = "***")
 	@JsonBackReference
 	private Cialco cialco;
 

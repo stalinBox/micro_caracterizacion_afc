@@ -9,17 +9,21 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Getter
 @Setter
-@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+
+@Entity
 @Table(name = "org_oferta_productiva_det", schema = "sc_gopagro")
-public class OfertaDetalle {
+public class OfertaDetalle implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@ApiModelProperty(value = "Este campo es la clave primaria de la tabla", required = true, readOnly = true)
@@ -30,46 +34,36 @@ public class OfertaDetalle {
 
 	@ApiModelProperty(value = "Este campo es el id de la tabla oferta Produciva", example = "5")
 	@Column(name = "oopd_cat_id_oferta")
-//	@NotEmpty(message = "_error.validation_Fblank.message")
 	@JsonProperty("oopdCatIdOferta")
 	private Integer oopdCatIdOferta;
 
 	@ApiModelProperty(value = "Este campo es el di de la tabla variedad", example = "5")
 	@Column(name = "oopd_agr_id_variedad")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdAgrIdVariedad")
 	private Integer oopdAgrIdVariedad;
 
 	@ApiModelProperty(value = "Condicion", example = "Condición")
 	@Column(name = "oopd_agr_condicion", nullable = false)
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdAgrCondicion")
 	private String oopdAgrCondicion;
 
 	@ApiModelProperty(value = "Este campo es el valor de la superficie", example = "5")
 	@Column(name = "oopd_superficie_sembrada")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdSuperficieSembrada")
 	private Integer oopdSuperficieSembrada;
 
 	@ApiModelProperty(value = "Unidad de medida de la siembra", example = "KG")
 	@Column(name = "oopd_unidad_medida_siembra", nullable = false)
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdUnidadMedidaSiembra")
 	private String oopdUnidadMedidaSiembra;
 
 	@ApiModelProperty(value = "Este campo es el id del metodo de siembra", example = "5")
 	@Column(name = "oopd_metodo_siembra_id")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdMetodoSiembraId")
 	private Integer oopdMetodoSiembraId;
 
 	@ApiModelProperty(value = "Valor en texto de la producción estimada", example = "1000")
 	@Column(name = "oopd_produccion_estimada", nullable = false)
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdProduccionEstimada")
 	private String oopdProduccionEstimada;
 
@@ -80,49 +74,47 @@ public class OfertaDetalle {
 
 	@ApiModelProperty(value = "Este campo es el di de la caegoria de presentaión", example = "5")
 	@Column(name = "oopd_id_cat_presentacion")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdIdCatPresentacion")
 	private Integer oopdIdCatPresentacion;
 
 	@ApiModelProperty(value = "Este campo es el id de la unidad de mediad", example = "5")
 	@Column(name = "oopd_id_cat_unidad_medida")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdIdCatUnidadMedida")
 	private Integer oopdIdCatUnidadMedida;
 
 	@ApiModelProperty(value = "Este campo es el id de la actividad economica", example = "5")
 	@Column(name = "oopd_id_cat_actividad_economica")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdIdCatActividadEconomica")
 	private Integer oopdIdCatActividadEconomica;
 
 	@ApiModelProperty(value = "Este campo es el id de la categoria del producto", example = "5")
 	@Column(name = "oopd_id_cat_producto")
-	// @NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("oopdIdCatProducto")
 	private Integer oopdIdCatProducto;
 
 	@ApiModelProperty(value = "Este campo es el id de la categoria del producto", example = "5")
-	@Column(name = "oopdCatIdsRuta")
-	// @NotEmpty(message = "_error.validation_blank.message")
+	@Column(name = "oopd_cat_ids_ruta")
 	@JsonProperty("oopdCatIdsRuta")
 	private String oopdCatIdsRuta;
 
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
-	@ApiModelProperty(value = "Este campo es  la clave primaria de la tabla persona tipo", position = 15)
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "cop_id")
+	@JsonProperty("certificacionOfertaProd")
+	private List<CertificacionOfertaProd> certificacionOfertaProd;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "mco_id")
+	@JsonProperty("mesCosecha")
+	private List<MesCosecha> mesCosecha;
+
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "oop_id")
 	@JsonProperty("organizacionOfertaProductiva")
 	@JsonBackReference
 	private OrganizacionOfertaProductiva organizacionOfertaProductiva;
-
-	@ApiModelProperty(value = "Este campo es  la clave primaria de la tabla persona tipo", position = 16)
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "cop_id")
-	@JsonProperty("certificacionOfertaProd")
-	private List<CertificacionOfertaProd> certificacionOfertaProd;
 
 	/*****************************************************
 	 * SECCION - CAMPOS POR DEFECTO EN TODAS LAS ENTIDADES

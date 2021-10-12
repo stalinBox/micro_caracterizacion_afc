@@ -23,6 +23,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Builder
+
 public class TipologiaNivelCreate {
 
 	@Id
@@ -51,9 +52,6 @@ public class TipologiaNivelCreate {
 	@JsonProperty("tipTipoNivel")
 	private Integer tipTipoNivel;
 
-	/*****************************************************
-	 * SECCION - CAMPOSS POR DEFECTO EN TODAS LAS ENTIDADES
-	 *****************************************************/
 	@ApiModelProperty(value = "Id de usuario que creó el regristro")
 	@JsonProperty("tipRegUsu")
 	@NotNull(message = "_error.validation_blank.message")

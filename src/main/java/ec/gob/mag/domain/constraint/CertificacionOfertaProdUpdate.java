@@ -1,7 +1,5 @@
 package ec.gob.mag.domain.constraint;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -9,10 +7,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ec.gob.mag.domain.Cialco;
+import ec.gob.mag.domain.OfertaDetalle;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,40 +26,29 @@ import lombok.Setter;
 @Setter
 @Entity
 @Builder
-public class FuncionamientoCialcoCreate implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class CertificacionOfertaProdUpdate {
 
 	@Id
 	@ApiModelProperty(value = "Este campo es la clave primaria de la tabla", required = true, readOnly = true)
-	@JsonProperty("fciaId")
-	private Long fciaId;
-
-	@ApiModelProperty(value = "ID de la categoria del dia de funcionamiento")
-	@JsonProperty("fciaIdCatdiaFuncionamiento")
+	@JsonProperty("copId")
 	@NotNull(message = "_error.validation_blank.message")
-	private Integer fciaIdCatdiaFuncionamiento;
+	private Long copId;
 
-	@ApiModelProperty(value = "Hora de Inicio de Actividades")
-	@JsonProperty("fciaIdCatHoraInicio")
-	private Integer fciaIdCatHoraInicio;
+	@ApiModelProperty(value = "Aqui se digita el id de la categoria de la Certificación", example = "0")
+	@JsonProperty("idcatcertificacion")
+	private Integer idCatCertificacion;
 
-	@ApiModelProperty(value = "Hora de Fin de Actividades")
-	@JsonProperty("fciaIdCatHoraFin")
-	private Integer fciaIdCatHoraFin;
-
-	@ApiModelProperty(value = "Id de usuario que creó el regristro")
-	@JsonProperty("fciaRegUsu")
+	@ApiModelProperty(value = "Id de usuario que creó el regristro", example = "0")
+	@JsonProperty("copActUsu")
 	@NotNull(message = "_error.validation_blank.message")
-	private Integer fciaRegUsu;
+	private Long copActUsu;
 
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "cia_id")
-	@ApiModelProperty(value = " Clave foranea de la tabla CIALCO", notes = "***")
+	@JoinColumn(name = "oopd_id")
 	@JsonBackReference
-	private Cialco cialco;
+	private OfertaDetalle ofertaDetalle;
 
 }

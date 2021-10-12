@@ -75,7 +75,7 @@ public class OrganizacionOfertaProductivaService {
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
 					id));
-		clearObjectLazyVariables(oop.get());
+//		clearObjectLazyVariables(oop.get());
 		return oop;
 	}
 
@@ -93,6 +93,7 @@ public class OrganizacionOfertaProductivaService {
 			throw new MyNotFoundException(String.format(
 					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
 					id));
+//		clearObjectLazyVariables(organizacionofertaproductiva.get());
 		return organizacionofertaproductiva;
 	}
 

@@ -146,27 +146,6 @@ public class TipologiaNivelController implements ErrorController {
 		return ResponseEntity.ok(new ResponseController(tipologianivelUpdate.getTipId(), "Actualizado"));
 	}
 
-//	/**
-//	 * Realiza un eliminado logico del registro
-//	 * 
-//	 * @param id:    Identificador del registro
-//	 * @param usuId: Identificador del usuario que va a eliminar
-//	 * @return ResponseController: Retorna el id eliminado
-//	 */
-//	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-//	@ApiOperation(value = "Remove tipologianivels by id")
-//	@ResponseStatus(HttpStatus.OK)
-//	public ResponseEntity<ResponseController> deleteTipologiaNivel(@RequestHeader(name = "Authorization") String token,
-//			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
-//		TipologiaNivel deleteTipologiaNivel = tipologiaNivelService.findById(id).orElseThrow(
-//				() -> new InvalidConfigurationPropertyValueException("TipologiaNivel", "Id", id.toString()));
-//		deleteTipologiaNivel.setTipEliminado(true);
-//		deleteTipologiaNivel.setTipActUsu(usuId);
-//		TipologiaNivel tipologianivelDel = tipologiaNivelService.save(deleteTipologiaNivel);
-//		LOGGER.info("tipologiaNivel Delete id: " + id + " usuario: " + util.filterUsuId(token));
-//		return ResponseEntity.ok(new ResponseController(tipologianivelDel.getTipId(), "eliminado"));
-//	}
-
 	/**
 	 * Inserta un nuevo registro en la entidad
 	 * 
