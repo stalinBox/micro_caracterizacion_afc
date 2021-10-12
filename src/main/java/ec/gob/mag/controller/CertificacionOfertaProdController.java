@@ -112,7 +112,7 @@ public class CertificacionOfertaProdController implements ErrorController {
 	 * @param id: Identificador de la entidad
 	 * @return parametrosCarga: Retorna el registro encontrado
 	 */
-	@RequestMapping(value = "/findById/{id}", method = RequestMethod.GET)
+	@GetMapping(value = "/findById/{id}")
 	@ApiOperation(value = "Get CertificacionOfertaProd by id", response = CertificacionOfertaProd.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Optional<CertificacionOfertaProd>> findById(
