@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
 import ec.gob.mag.domain.FuncionamientoCialco;
+import ec.gob.mag.domain.constraint.FuncionamientoCialcoCreate;
+import ec.gob.mag.domain.constraint.FuncionamientoCialcoUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.domain.dto.FuncionamientoCialcoDTO;
 import ec.gob.mag.domain.pagination.AppUtil;
@@ -37,6 +40,7 @@ import ec.gob.mag.domain.pagination.DataTableRequest;
 import ec.gob.mag.domain.pagination.DataTableResults;
 import ec.gob.mag.domain.pagination.PaginationCriteria;
 import ec.gob.mag.services.FuncionamientoCialcoService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -69,6 +73,10 @@ public class FuncionamientoCialcoController implements ErrorController {
 	@Autowired
 	@Qualifier("util")
 	private Util util;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -155,40 +163,26 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Valid @RequestBody FuncionamientoCialco updateFuncionamientoCialco, @PathVariable Integer usuId) {
-		updateFuncionamientoCialco.setFciaActUsu(usuId);
-		FuncionamientoCialco funcionamientocialcoUpdate = funcionamientoCialcoService
-				.update(updateFuncionamientoCialco);
+			@Validated @RequestBody FuncionamientoCialcoUpdate updateFuncionamientoCialco) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+
+		FuncionamientoCialco funCialcoValidado = convertEntityUtil.ConvertSingleEntityGET(FuncionamientoCialco.class,
+				(Object) updateFuncionamientoCialco);
+		funCialcoValidado.setCialco(updateFuncionamientoCialco.getCialco());
+		FuncionamientoCialco funcionamientocialcoUpdate = funcionamientoCialcoService.update(funCialcoValidado);
 		LOGGER.info(
 				"funcionamientocialco Update: " + funcionamientocialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(funcionamientocialcoUpdate.getFciaId(), "Actualizado"));
-	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove funcionamientocialcos by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteFuncionamientoCialco(
-			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
-			@PathVariable Integer usuId) {
-		FuncionamientoCialco deleteFuncionamientoCialco = funcionamientoCialcoService.findById(id).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("FuncionamientoCialco", "Id", id.toString()));
-		deleteFuncionamientoCialco.setFciaEliminado(true);
-		deleteFuncionamientoCialco.setFciaActUsu(usuId);
-		FuncionamientoCialco funcionamientocialcoDel = funcionamientoCialcoService.save(deleteFuncionamientoCialco);
-		LOGGER.info("funcionamientocialco Delete id: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(funcionamientocialcoDel.getFciaId(), "eliminado"));
 	}
 
 	/**
@@ -196,14 +190,24 @@ public class FuncionamientoCialcoController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postFuncionamientoCialco(
 			@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody FuncionamientoCialco funcionamientocialco) {
-		FuncionamientoCialco off = funcionamientoCialcoService.save(funcionamientocialco);
+			@Validated @RequestBody FuncionamientoCialcoCreate funcionamientocialco) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+
+		FuncionamientoCialco funCialcoValidado = convertEntityUtil.ConvertSingleEntityGET(FuncionamientoCialco.class,
+				(Object) funcionamientocialco);
+		funCialcoValidado.setCialco(funcionamientocialco.getCialco());
+		FuncionamientoCialco off = funcionamientoCialcoService.save(funCialcoValidado);
 		LOGGER.info("funcionamientocialco create: " + funcionamientocialco + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getFciaId(), "Creado"));
 	}

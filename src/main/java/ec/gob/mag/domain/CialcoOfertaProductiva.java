@@ -45,13 +45,11 @@ public class CialcoOfertaProductiva {
 
 	@ApiModelProperty(value = "Aqui se digita el id de lac ategoria de la oferta productiva", example = "5")
 	@Column(name = "ciop_cat_id_oferta", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("ciopCatIdOferta")
 	private Integer ciopCatIdOferta;
 
 	@ApiModelProperty(value = "Aqui se digita el id de lac ategoria de la oferta productiva", example = "5")
 	@Column(name = "ciop_cat_ids_ruta", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("ciopCatIdsRuta")
 	private String ciopCatIdsRuta;
 	/*****************************************************
@@ -80,7 +78,7 @@ public class CialcoOfertaProductiva {
 	@ApiModelProperty(value = "Id de usuario que creó el regristro", example = "")
 	@Column(name = "ciop_reg_usu", nullable = false)
 	@JsonProperty("ciopRegUsu")
-	private Long ciopRegUsu;
+	private Integer ciopRegUsu;
 
 	@ApiModelProperty(value = "Fecha en la que hizo la actualización del registro", example = "")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -91,7 +89,7 @@ public class CialcoOfertaProductiva {
 	@ApiModelProperty(value = "Id de usuario que actualizacio del qi", example = "")
 	@Column(name = "ciop_act_usu")
 	@JsonProperty("ciopActUsu")
-	private Long ciopActUsu;
+	private Integer ciopActUsu;
 
 	@ApiModelProperty(value = "Este campo almacena los valores f =false para eliminado logico  y t= true para indicar que está activo", required = true, allowableValues = "false=>no eliminado lógico, true=> eliminado lógico", example = "")
 	@Column(name = "ciop_eliminado", columnDefinition = "boolean default false")

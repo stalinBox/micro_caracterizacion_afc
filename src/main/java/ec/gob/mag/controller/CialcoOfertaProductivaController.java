@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 
 import ec.gob.mag.domain.CialcoOfertaProductiva;
+import ec.gob.mag.domain.constraint.CialcoOfertaProductivaCreate;
+import ec.gob.mag.domain.constraint.CialcoOfertaProductivaUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.domain.dto.CialcoOfertaProductivaDTO;
 import ec.gob.mag.domain.pagination.AppUtil;
@@ -37,6 +40,7 @@ import ec.gob.mag.domain.pagination.DataTableRequest;
 import ec.gob.mag.domain.pagination.DataTableResults;
 import ec.gob.mag.domain.pagination.PaginationCriteria;
 import ec.gob.mag.services.CialcoOfertaProductivaService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -71,6 +75,10 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	@Qualifier("util")
 	private Util util;
 
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -92,7 +100,7 @@ public class CialcoOfertaProductivaController implements ErrorController {
 
 		ciop.setCiopEliminado(audit.getEliminado());
 		ciop.setCiopEstado(audit.getEstado());
-		ciop.setCiopActUsu((long) audit.getActUsu());
+		ciop.setCiopActUsu(audit.getActUsu());
 
 		CialcoOfertaProductiva cialcoDel = cialcoOfertaProductivaService.save(ciop);
 		LOGGER.info("Cialco OfertaProductiva state-record : " + audit.getId() + " usuario: " + util.filterUsuId(token));
@@ -139,17 +147,27 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Valid @RequestBody CialcoOfertaProductiva updateCialcoOfertaProductiva, @PathVariable Long usuId) {
-		updateCialcoOfertaProductiva.setCiopActUsu(usuId);
-		// TODOS LOS CAMPOS A ACTUALIZAR
+			@Validated @RequestBody CialcoOfertaProductivaUpdate updateCialcoOfertaProductiva)
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+			IOException {
 
-		CialcoOfertaProductiva cialcoofertaproductivaUpdate = cialcoOfertaProductivaService
-				.update(updateCialcoOfertaProductiva);
+		CialcoOfertaProductiva ccopValidado = convertEntityUtil.ConvertSingleEntityGET(CialcoOfertaProductiva.class,
+				(Object) updateCialcoOfertaProductiva);
+
+		ccopValidado.setCialco(updateCialcoOfertaProductiva.getCialco());
+		CialcoOfertaProductiva cialcoofertaproductivaUpdate = cialcoOfertaProductivaService.update(ccopValidado);
+
+		cialcoofertaproductivaUpdate.setCialco(updateCialcoOfertaProductiva.getCialco());
 		LOGGER.info("cialcofertaprod Update: " + cialcoofertaproductivaUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoofertaproductivaUpdate.getCiopId(), "Actualizado"));
 	}
@@ -159,14 +177,23 @@ public class CialcoOfertaProductivaController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postCialcoOfertaProductiva(
 			@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody CialcoOfertaProductiva cialcoofertaproductiva) {
-		CialcoOfertaProductiva off = cialcoOfertaProductivaService.save(cialcoofertaproductiva);
+			@Validated @RequestBody CialcoOfertaProductivaCreate cialcoofertaproductiva) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+		CialcoOfertaProductiva ccopValidado = convertEntityUtil.ConvertSingleEntityGET(CialcoOfertaProductiva.class,
+				(Object) cialcoofertaproductiva);
+		ccopValidado.setCialco(cialcoofertaproductiva.getCialco());
+		CialcoOfertaProductiva off = cialcoOfertaProductivaService.save(ccopValidado);
 		LOGGER.info("cialcofertaprod create: " + cialcoofertaproductiva + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getCiopId(), "Creado"));
 	}

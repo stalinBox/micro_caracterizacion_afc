@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +24,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.OrganizacionCialco;
+import ec.gob.mag.domain.constraint.OrganizacionCialcoCreate;
+import ec.gob.mag.domain.constraint.OrganizacionCialcoUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.OrganizacionCialcoService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -52,6 +58,10 @@ public class OrganizacionCialcoController implements ErrorController {
 	@Autowired
 	@Qualifier("responseController")
 	private ResponseController responseController;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	@Autowired
 	@Qualifier("util")
@@ -120,38 +130,24 @@ public class OrganizacionCialcoController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.POST)
+	@PutMapping(value = "/update/")
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody OrganizacionCialco updateOrganizacionCialco, @PathVariable Integer usuId) {
-		updateOrganizacionCialco.setOciActUsu(usuId);
-		OrganizacionCialco organizacioncialcoUpdate = organizacionCialcoService.update(updateOrganizacionCialco);
+			@Validated @RequestBody OrganizacionCialcoUpdate updateOrganizacionCialco) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+		OrganizacionCialco orgCialcoValidado = convertEntityUtil.ConvertSingleEntityGET(OrganizacionCialco.class,
+				(Object) updateOrganizacionCialco);
+		orgCialcoValidado.setCialco(updateOrganizacionCialco.getCialco());
+		OrganizacionCialco organizacioncialcoUpdate = organizacionCialcoService.update(orgCialcoValidado);
 		LOGGER.info("orgcialco Update: " + organizacioncialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(organizacioncialcoUpdate.getOciId(), "Actualizado"));
-	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove organizacioncialcos by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteOrganizacionCialco(
-			@RequestHeader(name = "Authorization") String token, @Validated @PathVariable Long id,
-			@PathVariable Integer usuId) {
-		OrganizacionCialco deleteOrganizacionCialco = organizacionCialcoService.findById(id).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("OrganizacionCialco", "Id", id.toString()));
-		deleteOrganizacionCialco.setOciEliminado(true);
-		deleteOrganizacionCialco.setOciActUsu(usuId);
-		OrganizacionCialco organizacioncialcoDel = organizacionCialcoService.save(deleteOrganizacionCialco);
-		LOGGER.info("orgcialco Delete : " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(organizacioncialcoDel.getOciId(), "eliminado"));
 	}
 
 	/**
@@ -159,15 +155,23 @@ public class OrganizacionCialcoController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/create/", method = RequestMethod.POST)
-	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
+	@PostMapping(value = "/create/")
+	@ApiOperation(value = "Inserta los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<ResponseController> postOrganizacionCialco(
-			@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody OrganizacionCialco organizacioncialco) {
-		OrganizacionCialco off = organizacionCialcoService.save(organizacioncialco);
-		LOGGER.info("orgcialco Save: " + organizacioncialco + " usuario: " + util.filterUsuId(token));
+	public ResponseEntity<ResponseController> create(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody OrganizacionCialcoCreate organizacionCialco) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+		OrganizacionCialco organizacioncialcoValidado = convertEntityUtil
+				.ConvertSingleEntityGET(OrganizacionCialco.class, (Object) organizacionCialco);
+		organizacioncialcoValidado.setCialco(organizacionCialco.getCialco());
+		OrganizacionCialco off = organizacionCialcoService.save(organizacioncialcoValidado);
+		LOGGER.info("orgcialco Save: " + off + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getOciId(), "Creado"));
 	}
 

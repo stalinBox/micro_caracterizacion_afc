@@ -51,37 +51,29 @@ public class OrganizacionCialco {
 	private Integer orgId;
 
 	@ApiModelProperty(value = "Nombre de la razon social", example = "nombre de la razon social")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "org_razon_social", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("orgRazonSocial")
 	private String orgRazonSocial;
 
 	@ApiModelProperty(value = "Ruc de la organizacion", example = "0000000000001")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "org_identificacion", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("orgIdentificacion")
 	private String orgIdentificacion;
 
-	@ApiModelProperty(value = "Estado Negocio", example = "Estado Negocio")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
+	@ApiModelProperty(value = "Estado Negocio")
 	@Column(name = "oci_estado_negocio", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("ociEstadoNegocio")
 	private Integer ociEstadoNegocio;
 
 	@ApiModelProperty(value = "Valor texto del nombre de la categoria", example = "nombre categoria")
-	// @Size(min = 0, max = 64, message = "_error.validation_range.message-[0, 64]")
 	@Column(name = "oci_negocio_observacion", nullable = false)
-//	@NotEmpty(message = "_error.validation_blank.message")
 	@JsonProperty("ociNegocioObservacion")
 	private String ociNegocioObservacion;
 
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "cia_id")
 	@ApiModelProperty(value = " Clave foranea de la tabla CIALCO", notes = "***")
 	@JsonBackReference

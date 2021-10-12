@@ -1,0 +1,11 @@
+{
+	"orgId": 1955,
+	"orgRazonSocial": "NOMBRE",
+	"orgIdentificacion": "0000000000001",
+	"ociEstadoNegocio": 1111,
+	"ociNegocioObservacion": "nombre categoria",
+	"ociRegUsu": 1,
+	"cialco": {
+		"ciaId": 2
+	}
+}

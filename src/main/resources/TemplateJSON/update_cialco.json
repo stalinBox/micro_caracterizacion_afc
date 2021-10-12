@@ -1,4 +1,5 @@
 {
+	"ciaId": 1,
 	"ubiIdProvincia": 2,
 	"ubiIdCanton": 26,
 	"ubiIdParroquia": 248,
@@ -24,7 +25,11 @@
 	"ciaEstadoNegocio": 3331,
 	"ciaNegocioObservacion": "cia_negocio_observacion",
 	"ciaRegUsu": 1,
+	"ciaActUsu": 666666,
 	"tipologiaNivel": {
 		"tipId": 1
 	}
 }
+
+
+

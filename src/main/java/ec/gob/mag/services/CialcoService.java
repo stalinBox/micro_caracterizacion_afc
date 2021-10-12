@@ -128,9 +128,8 @@ public class CialcoService {
 	 * @param entidad: Contiene todos campos de la entidad para guardar
 	 * @return catalogo: La entidad Guardada
 	 */
-	public Cialco update(CialcoUpdate newCialco, Integer usupId) {
+	public Cialco update(CialcoUpdate newCialco) {
 		Optional<Cialco> oldCialco = findById(newCialco.getCiaId(), false, Constante.REGISTRO_ACTIVO.getCodigo());
-		oldCialco.get().setCiaActUsu(usupId);
 		copyNonNullProperties(newCialco, oldCialco.get());
 		return cialcoRepository.save(oldCialco.get());
 	}

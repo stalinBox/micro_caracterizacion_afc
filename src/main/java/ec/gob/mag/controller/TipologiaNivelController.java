@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.TipologiaNivel;
 import ec.gob.mag.domain.constraint.RegisterAudit;
+import ec.gob.mag.domain.constraint.TipologiaNivelCreate;
+import ec.gob.mag.domain.constraint.TipologiaNivelUpdate;
 import ec.gob.mag.services.TipologiaNivelService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -52,6 +56,10 @@ public class TipologiaNivelController implements ErrorController {
 	@Autowired
 	@Qualifier("responseController")
 	private ResponseController responseController;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	@Autowired
 	@Qualifier("util")
@@ -119,51 +127,66 @@ public class TipologiaNivelController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody TipologiaNivel updateTipologiaNivel, @PathVariable Integer usuId) {
-		updateTipologiaNivel.setTipActUsu(usuId);
-		TipologiaNivel tipologianivelUpdate = tipologiaNivelService.update(updateTipologiaNivel);
+			@Validated @RequestBody TipologiaNivelUpdate updateTipologiaNivel) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+		TipologiaNivel topologiaValidado = convertEntityUtil.ConvertSingleEntityGET(TipologiaNivel.class,
+				(Object) updateTipologiaNivel);
+		TipologiaNivel tipologianivelUpdate = tipologiaNivelService.update(topologiaValidado);
 		LOGGER.info("tipologiaNivel Update: " + tipologianivelUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(tipologianivelUpdate.getTipId(), "Actualizado"));
 	}
 
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove tipologianivels by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteTipologiaNivel(@RequestHeader(name = "Authorization") String token,
-			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
-		TipologiaNivel deleteTipologiaNivel = tipologiaNivelService.findById(id).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("TipologiaNivel", "Id", id.toString()));
-		deleteTipologiaNivel.setTipEliminado(true);
-		deleteTipologiaNivel.setTipActUsu(usuId);
-		TipologiaNivel tipologianivelDel = tipologiaNivelService.save(deleteTipologiaNivel);
-		LOGGER.info("tipologiaNivel Delete id: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(tipologianivelDel.getTipId(), "eliminado"));
-	}
+//	/**
+//	 * Realiza un eliminado logico del registro
+//	 * 
+//	 * @param id:    Identificador del registro
+//	 * @param usuId: Identificador del usuario que va a eliminar
+//	 * @return ResponseController: Retorna el id eliminado
+//	 */
+//	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
+//	@ApiOperation(value = "Remove tipologianivels by id")
+//	@ResponseStatus(HttpStatus.OK)
+//	public ResponseEntity<ResponseController> deleteTipologiaNivel(@RequestHeader(name = "Authorization") String token,
+//			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
+//		TipologiaNivel deleteTipologiaNivel = tipologiaNivelService.findById(id).orElseThrow(
+//				() -> new InvalidConfigurationPropertyValueException("TipologiaNivel", "Id", id.toString()));
+//		deleteTipologiaNivel.setTipEliminado(true);
+//		deleteTipologiaNivel.setTipActUsu(usuId);
+//		TipologiaNivel tipologianivelDel = tipologiaNivelService.save(deleteTipologiaNivel);
+//		LOGGER.info("tipologiaNivel Delete id: " + id + " usuario: " + util.filterUsuId(token));
+//		return ResponseEntity.ok(new ResponseController(tipologianivelDel.getTipId(), "eliminado"));
+//	}
 
 	/**
 	 * Inserta un nuevo registro en la entidad
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postTipologiaNivel(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody TipologiaNivel tipologianivel) {
-		TipologiaNivel off = tipologiaNivelService.save(tipologianivel);
+			@Validated @RequestBody TipologiaNivelCreate tipologianivel) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+		TipologiaNivel topologiaValidado = convertEntityUtil.ConvertSingleEntityGET(TipologiaNivel.class,
+				(Object) tipologianivel);
+		TipologiaNivel off = tipologiaNivelService.save(topologiaValidado);
 		LOGGER.info("TipologiaNivel create: " + tipologianivel + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getTipId(), "Creado"));
 	}

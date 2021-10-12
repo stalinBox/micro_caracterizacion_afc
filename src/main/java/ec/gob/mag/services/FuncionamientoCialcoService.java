@@ -127,10 +127,10 @@ public class FuncionamientoCialcoService {
 	 * @param entidad: Contiene todos campos de la entidad para guardar
 	 * @return catalogo: La entidad Guardada
 	 */
-	public FuncionamientoCialco update(FuncionamientoCialco funcionamientocialco) {
-		Optional<FuncionamientoCialco> oldEntity = findById(funcionamientocialco.getFciaId());
-		copyNonNullProperties(funcionamientocialco, oldEntity.get());
-		return funcionamientoCialcoRepository.save(funcionamientocialco);
+	public FuncionamientoCialco update(FuncionamientoCialco newEntity) {
+		Optional<FuncionamientoCialco> oldEntity = findById(newEntity.getFciaId());
+		copyNonNullProperties(newEntity, oldEntity.get());
+		return funcionamientoCialcoRepository.save(oldEntity.get());
 	}
 
 	public static void copyNonNullProperties(Object src, Object target) {

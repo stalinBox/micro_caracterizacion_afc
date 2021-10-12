@@ -143,13 +143,13 @@ public class CialcoController implements ErrorController {
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
 	 */
-	@PutMapping(value = "/update/{usuId}")
+	@PutMapping(value = "/update/")
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token, @PathVariable Integer usuId,
-			@RequestBody CialcoUpdate updateCialco) {
-		Cialco cialcoUpdate = cialcoService.update(updateCialco, usuId);
-		cialcoUpdate.setCiaActUsu(usuId);
+	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token,
+			@Validated @RequestBody CialcoUpdate updateCialco) {
+		Cialco cialcoUpdate = cialcoService.update(updateCialco);
+		cialcoUpdate.setTipologiaNivel(updateCialco.getTipologiaNivel());
 		LOGGER.info("cialco Update: " + cialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoUpdate.getCiaId(), "Actualizado"));
 	}
@@ -171,8 +171,9 @@ public class CialcoController implements ErrorController {
 	public ResponseEntity<?> postCialco(@Validated @RequestBody CialcoCreate cialco,
 			@RequestHeader(name = "Authorization") String token) throws NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, IOException {
-		Cialco productorValidado = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
-		Cialco off = cialcoService.save(productorValidado);
+		Cialco cialcoValidado = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
+		cialcoValidado.setTipologiaNivel(cialco.getTipologiaNivel());
+		Cialco off = cialcoService.save((cialcoValidado));
 		LOGGER.info("cialco Cialco create: " + cialco + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getCiaId(), "Creado"));
 	}
