@@ -1,5 +1,6 @@
 package ec.gob.mag.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +22,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import ec.gob.mag.domain.OfertaDetalle;
+import ec.gob.mag.domain.constraint.OfertaDetalleCreate;
+import ec.gob.mag.domain.constraint.OfertaDetalleUpdate;
 import ec.gob.mag.domain.constraint.RegisterAudit;
 import ec.gob.mag.services.OfertaDetalleService;
+import ec.gob.mag.util.ConvertEntityUtil;
 import ec.gob.mag.util.ResponseController;
 import ec.gob.mag.util.Util;
 import io.swagger.annotations.Api;
@@ -51,6 +55,10 @@ public class OfertaDetalleController implements ErrorController {
 	@Autowired
 	@Qualifier("responseController")
 	private ResponseController responseController;
+
+	@Autowired
+	@Qualifier("convertEntityUtil")
+	private ConvertEntityUtil convertEntityUtil;
 
 	@Autowired
 	@Qualifier("util")
@@ -118,37 +126,25 @@ public class OfertaDetalleController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a actualizar
 	 * @return ResponseController: Retorna el id actualizado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	@RequestMapping(value = "/update/{usuId}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/update/", method = RequestMethod.PUT)
 	@ApiOperation(value = "Actualizar los registros", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<ResponseController> update(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody OfertaDetalle updateOfertaDetalle, @PathVariable Integer usuId) {
-		updateOfertaDetalle.setOopdActUsu(usuId);
-		OfertaDetalle ofertadetalleUpdate = ofertaDetalleService.update(updateOfertaDetalle);
+			@Validated @RequestBody OfertaDetalleUpdate ofertadetalle) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+
+		OfertaDetalle mescosechaValidado = convertEntityUtil.ConvertSingleEntityGET(OfertaDetalle.class,
+				(Object) ofertadetalle);
+		mescosechaValidado.setOrganizacionOfertaProductiva(ofertadetalle.getOrganizacionOfertaProductiva());
+		OfertaDetalle ofertadetalleUpdate = ofertaDetalleService.update(mescosechaValidado);
 		LOGGER.info("ofertadetalle Update: " + ofertadetalleUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(ofertadetalleUpdate.getOopdId(), "Actualizado"));
-	}
-
-	/**
-	 * Realiza un eliminado logico del registro
-	 * 
-	 * @param id:    Identificador del registro
-	 * @param usuId: Identificador del usuario que va a eliminar
-	 * @return ResponseController: Retorna el id eliminado
-	 */
-	@RequestMapping(value = "/delete/{id}/{usuId}", method = RequestMethod.DELETE)
-	@ApiOperation(value = "Remove ofertadetalles by id")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<ResponseController> deleteOfertaDetalle(@RequestHeader(name = "Authorization") String token,
-			@Validated @PathVariable Long id, @PathVariable Integer usuId) {
-		OfertaDetalle deleteOfertaDetalle = ofertaDetalleService.findById(id).orElseThrow(
-				() -> new InvalidConfigurationPropertyValueException("OfertaDetalle", "Id", id.toString()));
-		deleteOfertaDetalle.setOopdEliminado(true);
-		deleteOfertaDetalle.setOopdActUsu(usuId);
-		OfertaDetalle ofertadetalleDel = ofertaDetalleService.save(deleteOfertaDetalle);
-		LOGGER.info("ofertadetalle Delete: " + id + " usuario: " + util.filterUsuId(token));
-		return ResponseEntity.ok(new ResponseController(ofertadetalleDel.getOopdId(), "eliminado"));
 	}
 
 	/**
@@ -156,13 +152,22 @@ public class OfertaDetalleController implements ErrorController {
 	 * 
 	 * @param entidad: entidad a insertar
 	 * @return ResponseController: Retorna el id creado
+	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@RequestMapping(value = "/create/", method = RequestMethod.POST)
 	@ApiOperation(value = "Crear nuevo registro", response = ResponseController.class)
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<ResponseController> postOfertaDetalle(@RequestHeader(name = "Authorization") String token,
-			@Validated @RequestBody OfertaDetalle ofertadetalle) {
-		OfertaDetalle off = ofertaDetalleService.save(ofertadetalle);
+			@Validated @RequestBody OfertaDetalleCreate ofertadetalle) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, IOException {
+		OfertaDetalle mescosechaValidado = convertEntityUtil.ConvertSingleEntityGET(OfertaDetalle.class,
+				(Object) ofertadetalle);
+		mescosechaValidado.setOrganizacionOfertaProductiva(ofertadetalle.getOrganizacionOfertaProductiva());
+		OfertaDetalle off = ofertaDetalleService.save(mescosechaValidado);
 		LOGGER.info("ofertadetalle create: " + ofertadetalle + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getOopdId(), "Creado"));
 	}

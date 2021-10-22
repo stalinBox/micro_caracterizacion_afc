@@ -1,0 +1,21 @@
+{
+	"oopdId": 12,
+	"oopdAgrCondicion": "Condición",
+	"oopdAgrIdVariedad": 5,
+	"oopdCatIdOferta": 5,
+	"oopdCatIdsRuta": "5",
+	"oopdDisponeCertificacion": false,
+	"oopdIdCatActividadEconomica": 5,
+	"oopdIdCatPresentacion": 5,
+	"oopdIdCatProducto": 5,
+	"oopdIdCatUnidadMedida": 5,
+	"oopdMetodoSiembraId": 5,
+	"oopdProduccionEstimada": "1000",
+	"oopdRegUsu": 0,
+	"oopdSuperficieSembrada": 5,
+	"oopdUnidadMedidaSiembra": "KG",
+	"oopdActUsu": 55,
+	"organizacionOfertaProductiva": {
+		"oopId": 1
+	}
+}

@@ -1,7 +1,7 @@
 {
-	"id": 0,
-	"actUsu": 0,
-	"eliminado": false,
-	"estado": 11,
-	"desc": "disable"
+	"id": 14,
+	"actUsu": 2555,
+	"eliminado": true,
+	"estado": 12,
+	"desc": "delete"
 }

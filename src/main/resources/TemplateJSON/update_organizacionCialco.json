@@ -1,12 +1,12 @@
 {
-	"ociId": 1,
-	"orgId": 0,
-	"ociEstadoNegocio": "Estado Negocio",
-	"ociNegocioObservacion": "nombre categoria",
-	"orgIdentificacion": "0000000000001",
-	"orgRazonSocial": "nombre de la razon social",
-	"ociActUsu": 66669999,
 	"cialco": {
 		"ciaId": 1
-	}
+	},
+	"ociActUsu": 2,
+	"ociEstadoNegocio": "22",
+	"ociId": 7,
+	"ociNegocioObservacion": "nombre categoria",
+	"orgId": 2,
+	"orgIdentificacion": "1804608774001",
+	"orgRazonSocial": "nombre de la razon social"
 }

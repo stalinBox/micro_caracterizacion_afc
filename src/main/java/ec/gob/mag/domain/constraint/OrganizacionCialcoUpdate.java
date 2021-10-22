@@ -52,7 +52,7 @@ public class OrganizacionCialcoUpdate implements Serializable {
 	@JsonProperty("orgIdentificacion")
 	private String orgIdentificacion;
 
-	@ApiModelProperty(value = "Estado Negocio", example = "Estado 255Negocio")
+	@ApiModelProperty(value = "Estado Negocio", example = "Estado Negocio")
 	@JsonProperty("ociEstadoNegocio")
 	private Integer ociEstadoNegocio;
 
