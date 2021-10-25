@@ -149,7 +149,7 @@ public class CialcoController implements ErrorController {
 	public ResponseEntity<?> update(@RequestHeader(name = "Authorization") String token,
 			@Validated @RequestBody CialcoUpdate updateCialco) {
 		Cialco cialcoUpdate = cialcoService.update(updateCialco);
-		cialcoUpdate.setTipologiaNivel(updateCialco.getTipologiaNivel());
+//		cialcoUpdate.setTipologiaNivel(updateCialco.getTipologiaNivel());
 		LOGGER.info("cialco Update: " + cialcoUpdate + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(cialcoUpdate.getCiaId(), "Actualizado"));
 	}
@@ -172,7 +172,7 @@ public class CialcoController implements ErrorController {
 			@RequestHeader(name = "Authorization") String token) throws NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, IOException {
 		Cialco cialcoValidado = convertEntityUtil.ConvertSingleEntityGET(Cialco.class, (Object) cialco);
-		cialcoValidado.setTipologiaNivel(cialco.getTipologiaNivel());
+//		cialcoValidado.setTipologiaNivel(cialco.getTipologiaNivel());
 		Cialco off = cialcoService.save((cialcoValidado));
 		LOGGER.info("cialco Cialco create: " + cialco + " usuario: " + util.filterUsuId(token));
 		return ResponseEntity.ok(new ResponseController(off.getCiaId(), "Creado"));
@@ -193,21 +193,21 @@ public class CialcoController implements ErrorController {
 		DataTableRequest<CialcoDTO> dataTableInRQ = new DataTableRequest<CialcoDTO>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
 		String baseQuery = "SELECT  ROW_NUMBER() OVER (ORDER BY c.cia_id ) AS nro, \n"
-				+ "CAST (c.cia_id AS VARCHAR) , \n" + "CAST (cop.ciop_cat_id_oferta AS VARCHAR) ,  \n"
-				+ "CAST (ubi_id_provincia AS VARCHAR) , \n" + "CAST (ubi_id_canton AS VARCHAR) , \n"
-				+ "CAST (ubi_id_parroquia AS VARCHAR) ,  \n" + "CAST (org_id AS VARCHAR) ,\n"
-				+ "CAST (soc_id AS VARCHAR) ,\n" + "CAST (tip_id AS VARCHAR) ,\n"
-				+ "CAST (per_identificacion AS VARCHAR) ,\n" + "CAST (per_nombres AS VARCHAR) , \n"
-				+ "CAST (cia_nombre AS VARCHAR) ,\n" + "CAST (cia_descripcion AS VARCHAR) ,\n"
-				+ "CAST (cia_sect_referencia AS VARCHAR) , \n" + "CAST (cia_id_cat_frecuencia AS VARCHAR) ,\n"
-				+ "CAST (cia_direccion AS VARCHAR) ,\n" + "CAST (cia_telefono AS VARCHAR) ,\n"
-				+ "CAST (cia_celular AS VARCHAR) , \n" + "CAST (cia_correo AS VARCHAR) ,\n"
-				+ "CAST (cia_cord_x AS VARCHAR) ,\n" + "CAST (cia_cord_y AS VARCHAR) ,\n"
-				+ "CAST (cia_cord_z AS VARCHAR) , \n" + "CAST (cia_cord_hemisferio AS VARCHAR) ,\n"
-				+ "CAST (cia_cord_zona AS VARCHAR) ,\n" + "CAST (cia_cord_latitud AS VARCHAR) , \n"
-				+ "CAST (cia_cord_longitud AS VARCHAR) ,\n" + "CAST (cia_estado_negocio AS VARCHAR) , \n"
-				+ "CAST (cia_negocio_observacion AS VARCHAR) , \n" + "CAST (c.cia_estado AS VARCHAR) ,\n"
-				+ "CAST (c.cia_eliminado AS VARCHAR) ,\n"
+				+ "CAST (c.cia_id AS VARCHAR), \n" + "CAST (cop.ciop_cat_id_oferta AS VARCHAR), \n"
+				+ "CAST (ubi_id_provincia AS VARCHAR), \n" + "CAST (ubi_id_canton AS VARCHAR),\n"
+				+ "CAST (ubi_id_parroquia AS VARCHAR), \n" + "CAST (org_id AS VARCHAR),\n"
+				+ "CAST (soc_id AS VARCHAR), \n" + "CAST (tip_cat_id AS VARCHAR),\n"
+				+ "CAST (per_identificacion AS VARCHAR), \n" + "CAST (per_nombres AS VARCHAR),\n"
+				+ "CAST (cia_nombre AS VARCHAR), \n" + "CAST (cia_descripcion AS VARCHAR) ,\n"
+				+ "CAST (cia_sect_referencia AS VARCHAR), \n" + "CAST (cia_id_cat_frecuencia AS VARCHAR),\n"
+				+ "CAST (cia_direccion AS VARCHAR),\n" + "CAST (cia_telefono AS VARCHAR),\n"
+				+ "CAST (cia_celular AS VARCHAR), \n" + "CAST (cia_correo AS VARCHAR),\n"
+				+ "CAST (cia_cord_x AS VARCHAR),\n" + "CAST (cia_cord_y AS VARCHAR),\n"
+				+ "CAST (cia_cord_z AS VARCHAR), \n" + "CAST (cia_cord_hemisferio AS VARCHAR),\n"
+				+ "CAST (cia_cord_zona AS VARCHAR),\n" + "CAST (cia_cord_latitud AS VARCHAR),\n"
+				+ "CAST (cia_cord_longitud AS VARCHAR),\n" + "CAST (cia_estado_negocio AS VARCHAR),\n"
+				+ "CAST (cia_negocio_observacion AS VARCHAR), \n" + "CAST (c.cia_estado AS VARCHAR),\n"
+				+ "CAST (c.cia_eliminado AS VARCHAR),\n"
 				+ "(SELECT count(c.cia_id)  FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ) AS totalRecords\n"
 				+ "FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ORDER BY c.cia_id";
 		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);

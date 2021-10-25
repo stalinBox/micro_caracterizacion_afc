@@ -2,6 +2,7 @@ package ec.gob.mag.domain.constraint;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -15,8 +16,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ec.gob.mag.domain.TipologiaNivel;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -150,10 +149,13 @@ public class CialcoUpdate implements Serializable {
 	@JsonProperty("ciaActUsu")
 	private Integer ciaActUsu;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "tip_id")
-	@JsonProperty("tipologiaNivel")
-	@JsonBackReference
-	private TipologiaNivel tipologiaNivel;
+	@ApiModelProperty(value = "Estado Negocio", example = "id")
+	@JsonProperty("tipCatId")
+	private Integer tipCatId;
+//	@ManyToOne(fetch = FetchType.EAGER)
+//	@JoinColumn(name = "tip_id")
+//	@JsonProperty("tipologiaNivel")
+//	@JsonBackReference
+//	private TipologiaNivel tipologiaNivel;
 
 }

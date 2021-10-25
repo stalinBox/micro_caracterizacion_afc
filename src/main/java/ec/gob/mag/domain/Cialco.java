@@ -172,6 +172,10 @@ public class Cialco implements Serializable {
 	@JsonProperty("ciaNegocioObservacion")
 	private String ciaNegocioObservacion;
 
+	@ApiModelProperty(value = "Estado Negocio", example = "id")
+	@Column(name = "tip_cat_id", nullable = false)
+	@JsonProperty("tipCatId")
+	private Integer tipCatId;
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
@@ -190,11 +194,11 @@ public class Cialco implements Serializable {
 	@JsonProperty("organizacionCialco")
 	private List<OrganizacionCialco> organizacionCialco;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "tip_id")
-	@JsonProperty("tipologiaNivel")
-	@JsonBackReference
-	private TipologiaNivel tipologiaNivel;
+//	@ManyToOne(fetch = FetchType.EAGER)
+//	@JoinColumn(name = "tip_id")
+//	@JsonProperty("tipologiaNivel")
+//	@JsonBackReference
+//	private TipologiaNivel tipologiaNivel;
 
 	/*****************************************************
 	 * SECCION - CAMPOS POR DEFECTO EN TODAS LAS ENTIDADES

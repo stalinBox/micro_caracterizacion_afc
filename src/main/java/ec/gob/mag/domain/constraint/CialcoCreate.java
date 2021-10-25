@@ -3,22 +3,16 @@ package ec.gob.mag.domain.constraint;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ec.gob.mag.domain.TipologiaNivel;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -171,14 +165,19 @@ public class CialcoCreate implements Serializable {
 	@JsonProperty("ciaRegUsu")
 	@NotNull(message = "_error.validation_blank.message")
 	private Integer ciaRegUsu;
+
+	@ApiModelProperty(value = "Estado Negocio", example = "id")
+	@JsonProperty("tipCatId")
+	@NotNull(message = "_error.validation_blank.message")
+	private Integer tipCatId;
 	/*****************************************************
 	 * SECCION - RELACIONES JPA
 	 *****************************************************/
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "tip_id")
-	@JsonProperty("tipologiaNivel")
-	@JsonBackReference
-	private TipologiaNivel tipologiaNivel;
+//	@ManyToOne(fetch = FetchType.EAGER)
+//	@JoinColumn(name = "tip_id")
+//	@JsonProperty("tipologiaNivel")
+//	@JsonBackReference
+//	private TipologiaNivel tipologiaNivel;
 
 //	/*****************************************************
 //	 * SECCION - CAMPOS POR DEFECTO EN TODAS LAS ENTIDADES
