@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.persistence.*;
-//import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -13,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import ec.gob.mag.domain.OrganizacionOfertaProductiva;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 
 @Data
 @Getter
