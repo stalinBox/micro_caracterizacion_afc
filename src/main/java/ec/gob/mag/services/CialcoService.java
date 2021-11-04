@@ -129,7 +129,16 @@ public class CialcoService {
 	 * @return catalogo: La entidad Guardada
 	 */
 	public Cialco update(CialcoUpdate newCialco) {
-		Optional<Cialco> oldCialco = findById(newCialco.getCiaId(), false, Constante.REGISTRO_ACTIVO.getCodigo());
+		
+		
+		//Optional<Cialco> oldCialco = findById(newCialco.getCiaId(), false, Constante.REGISTRO_ACTIVO.getCodigo());
+		
+		Optional<Cialco> oldCialco = cialcoRepository.findByCiaIdAndCiaEliminadoAndCiaEstadoEquals(newCialco.getCiaId(), false, Constante.REGISTRO_ACTIVO.getCodigo());
+		if (!oldCialco.isPresent())
+			throw new MyNotFoundException(String.format(
+					messageSource.getMessage("error.entity_cero_exist.message", null, LocaleContextHolder.getLocale()),
+					newCialco.getCiaId()));
+		
 		copyNonNullProperties(newCialco, oldCialco.get());
 		return cialcoRepository.save(oldCialco.get());
 	}
