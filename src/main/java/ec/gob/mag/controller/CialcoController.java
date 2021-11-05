@@ -192,24 +192,28 @@ public class CialcoController implements ErrorController {
 			@RequestHeader(name = "Authorization") String token) {
 		DataTableRequest<CialcoDTO> dataTableInRQ = new DataTableRequest<CialcoDTO>(request);
 		PaginationCriteria pagination = dataTableInRQ.getPaginationRequest();
-		String baseQuery = "SELECT  ROW_NUMBER() OVER (ORDER BY c.cia_id ) AS nro, \n"
-				+ "CAST (c.cia_id AS VARCHAR), \n" + "CAST (cop.ciop_cat_id_oferta AS VARCHAR), \n"
-				+ "CAST (ubi_id_provincia AS VARCHAR), \n" + "CAST (ubi_id_canton AS VARCHAR),\n"
-				+ "CAST (ubi_id_parroquia AS VARCHAR), \n" + "CAST (org_id AS VARCHAR),\n"
-				+ "CAST (soc_id AS VARCHAR), \n" + "CAST (tip_cat_id AS VARCHAR),\n"
-				+ "CAST (per_identificacion AS VARCHAR), \n" + "CAST (per_nombres AS VARCHAR),\n"
-				+ "CAST (cia_nombre AS VARCHAR), \n" + "CAST (cia_descripcion AS VARCHAR) ,\n"
-				+ "CAST (cia_sect_referencia AS VARCHAR), \n" + "CAST (cia_id_cat_frecuencia AS VARCHAR),\n"
-				+ "CAST (cia_direccion AS VARCHAR),\n" + "CAST (cia_telefono AS VARCHAR),\n"
-				+ "CAST (cia_celular AS VARCHAR), \n" + "CAST (cia_correo AS VARCHAR),\n"
-				+ "CAST (cia_cord_x AS VARCHAR),\n" + "CAST (cia_cord_y AS VARCHAR),\n"
-				+ "CAST (cia_cord_z AS VARCHAR), \n" + "CAST (cia_cord_hemisferio AS VARCHAR),\n"
-				+ "CAST (cia_cord_zona AS VARCHAR),\n" + "CAST (cia_cord_latitud AS VARCHAR),\n"
-				+ "CAST (cia_cord_longitud AS VARCHAR),\n" + "CAST (cia_estado_negocio AS VARCHAR),\n"
-				+ "CAST (cia_negocio_observacion AS VARCHAR), \n" + "CAST (c.cia_estado AS VARCHAR),\n"
-				+ "CAST (c.cia_eliminado AS VARCHAR),\n"
-				+ "(SELECT count(c.cia_id)  FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ) AS totalRecords\n"
-				+ "FROM sc_gopagro.cialco c inner join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id ORDER BY c.cia_id";
+		String baseQuery = "SELECT  ROW_NUMBER() OVER (ORDER BY c.cia_id ) AS nro, \n" + 
+				"				CAST (c.cia_id AS VARCHAR), \n" + 
+				"				count(cop.ciop_cat_id_oferta) as VARCHAR,\n" + 
+				"				(select array_to_string(array(SELECT co.ciop_cat_id_oferta FROM sc_gopagro.cialco_oferta_productiva co where co.cia_id = c.cia_id), ',')) as ciop_cat_id_oferta,\n" + 
+				"				CAST (ubi_id_provincia AS VARCHAR),  CAST (ubi_id_canton AS VARCHAR),\n" + 
+				"				CAST (ubi_id_parroquia AS VARCHAR),  CAST (org_id AS VARCHAR),\n" + 
+				"				CAST (soc_id AS VARCHAR),  CAST (tip_cat_id AS VARCHAR),\n" + 
+				"				CAST (per_identificacion AS VARCHAR),  CAST (per_nombres AS VARCHAR),\n" + 
+				"				CAST (cia_nombre AS VARCHAR),  CAST (cia_descripcion AS VARCHAR) ,\n" + 
+				"				CAST (cia_sect_referencia AS VARCHAR),  CAST (cia_id_cat_frecuencia AS VARCHAR),\n" + 
+				"				CAST (cia_direccion AS VARCHAR), CAST (cia_telefono AS VARCHAR),\n" + 
+				"				CAST (cia_celular AS VARCHAR),  CAST (cia_correo AS VARCHAR),\n" + 
+				"				CAST (cia_cord_x AS VARCHAR), CAST (cia_cord_y AS VARCHAR),\n" + 
+				"				CAST (cia_cord_z AS VARCHAR),  CAST (cia_cord_hemisferio AS VARCHAR),\n" + 
+				"				CAST (cia_cord_zona AS VARCHAR), CAST (cia_cord_latitud AS VARCHAR),\n" + 
+				"				CAST (cia_cord_longitud AS VARCHAR), CAST (cia_estado_negocio AS VARCHAR),\n" + 
+				"				CAST (cia_negocio_observacion AS VARCHAR),  CAST (c.cia_estado AS VARCHAR),\n" + 
+				"				CAST (c.cia_eliminado AS VARCHAR),\n" + 
+				"				(SELECT count(distinct ci.cia_id) FROM sc_gopagro.cialco ci left join sc_gopagro.cialco_oferta_productiva ciop ON ci.cia_id = ciop.cia_id) AS totalRecords\n" + 
+				"				FROM sc_gopagro.cialco c LEFT join sc_gopagro.cialco_oferta_productiva cop ON c.cia_id = cop.cia_id\n" + 
+				"				group by c.cia_id\n" + 
+				"				ORDER BY c.cia_id";
 		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
 		Query query = entityManager.createNativeQuery(paginatedQuery, CialcoDTO.class);
 		List<CialcoDTO> userList = query.getResultList();

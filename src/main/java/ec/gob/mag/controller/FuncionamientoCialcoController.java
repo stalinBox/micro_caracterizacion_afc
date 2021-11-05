@@ -229,7 +229,7 @@ public class FuncionamientoCialcoController implements ErrorController {
 				+ "INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id = " + ciaId
 				+ ") as totalRecords \n"
 				+ "FROM sc_gopagro.funcionamiento_cialco f INNER JOIN  sc_gopagro.cialco c ON f.cia_id = c.cia_id WHERE f.cia_id =  "
-				+ ciaId + ciaId;
+				+ ciaId;
 		String paginatedQuery = AppUtil.buildPaginatedQuery(baseQuery, pagination);
 		Query query = entityManager.createNativeQuery(paginatedQuery, FuncionamientoCialcoDTO.class);
 		List<FuncionamientoCialcoDTO> userList = query.getResultList();
